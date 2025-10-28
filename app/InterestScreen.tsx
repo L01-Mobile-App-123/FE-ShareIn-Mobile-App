@@ -10,46 +10,24 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from "expo-router";
 import AddInterestCard from "@/components/interest/AddInterestCard";
+import InterestListScreen from "@/components/interest/InterestListScreen";
 
-export default function SearchScreen({ navigation }: any) {
+export default function InterestScreen({ navigation }: any) {
   const [query, setQuery] = useState("");
-  const [postListVisible, setPostListVisible] = useState(true);
-  const [selectedType, setSelectedType] = useState('');
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState(""); 
-  const [ category, setCategory ] = useState('');
-
-  const params = useLocalSearchParams();
 
   const handleSearch = (text: string) => {
-    if (text.trim().toLowerCase() === "table") {
-      setPostListVisible(false);
-    } else {
-      setPostListVisible(true);
-    }
+    setQuery(text);
   };
-
-  useEffect(() => {
-    if (params.filters) {
-      try {
-        const parsed = JSON.parse(params.filters as string);
-
-        setCategory(parsed.category ?? "");
-        setSelectedType(parsed.type ?? "");
-        setStartDate(parsed.startDate ?? "");
-        setEndDate(parsed.endDate ?? "");
-      } catch (e) {
-        console.warn("Error parsing filters:", e);
-      }
-    }
-  }, [params.filters]); 
 
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}> Search</Text>
+        <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}> List interests</Text>
       </View>
 
       {/* Search input */}
@@ -66,24 +44,10 @@ export default function SearchScreen({ navigation }: any) {
             style={styles.input}
           />
         </View>
-        <TouchableOpacity onPress={() => {
-          router.push({
-            pathname: '/FilterScreen',
-            params: {
-              filters: JSON.stringify({
-                category,
-                selectedType,
-                startDate,
-                endDate,
-              }),
-            },
-          });
-        }}>
-          <Ionicons name="filter" size={24} color="#333" />
-        </TouchableOpacity>
       </View>
 
-      {postListVisible ? <PostList /> : <AddInterestCard />}
+      <InterestListScreen />
+
     </View>
   );
 }
@@ -94,11 +58,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
-    marginTop: 40,
-  },
-  backArrow: {
-    fontSize: 22,
-    marginRight: 8,
   },
   headerTitle: {
     fontSize: 20,
@@ -121,17 +80,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     fontSize: 16,
-  },
-  bottomNav: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
-  },
-  navButton: {
-    alignItems: "center",
   },
   icon: { fontSize: 20 },
   active: {

@@ -22,6 +22,14 @@ export default function RootLayout() {
           name="ChatScreen"
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="FilterScreen"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="InterestScreen"
+          options={{ headerShown: false }}
+        />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
