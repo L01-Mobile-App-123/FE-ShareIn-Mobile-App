@@ -24,6 +24,7 @@
     "expo-haptics": "~15.0.7",
     "expo-image": "~3.0.10",
     "expo-image-picker": "~17.0.8",
+    "expo-linear-gradient": "~15.0.7",
     "expo-linking": "~8.0.8",
     "expo-router": "~6.0.13",
     "expo-speech-recognition": "^2.1.5",
@@ -41,8 +42,7 @@
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
     "react-native-web": "~0.21.0",
-    "react-native-worklets": "0.5.1",
-    "expo-linear-gradient": "~15.0.7"
+    "react-native-worklets": "0.5.1"
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
@@ -50,5 +50,6 @@
     "eslint-config-expo": "~10.0.0",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "packageManager": "yarn@4.11.0+sha512.4e54aeace9141df2f0177c266b05ec50dc044638157dae128c471ba65994ac802122d7ab35bcd9e81641228b7dcf24867d28e750e0bcae8a05277d600008ad54"
 }

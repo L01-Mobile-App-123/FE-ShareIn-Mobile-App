@@ -14,6 +14,7 @@ export default function SettingScreen() {
     { title: "Password", icon: "lock-closed-outline", route: "/password" },
     { title: "Setting profile", icon: "person-outline", route: "/profile-setting" },
     { title: "List of interest", icon: "heart-outline", route: "/InterestScreen" },
+    { title: "Sign out", icon: "log-out-outline", route: "/(auth)/Onboarding" },
   ];
 
   return (

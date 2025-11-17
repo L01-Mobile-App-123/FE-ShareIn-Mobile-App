@@ -321,10 +321,13 @@ const styles = StyleSheet.create({
   },
   applyButton: {
     backgroundColor: "#FF9A00",
-    borderRadius: 10,
-    paddingVertical: 14,
+    borderRadius: 8,
+    paddingVertical: 12,
     alignItems: "center",
     marginTop: 40,
+    paddingHorizontal: 80,
+    width: "80%",
+    alignSelf: "center",
   },
   applyText: {
     color: "#fff",
