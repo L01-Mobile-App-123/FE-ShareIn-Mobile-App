@@ -17,7 +17,6 @@ import ChatHeader from '@/components/chat/ChatHeader';
 import ChatInput from '@/components/chat/ChatInput';
 import UnblockBlockModal from '@/components/chat/UnblockModal';
 
-
 export default function ChatScreen() {
   const [showBlockModal, setShowBlockModal] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
@@ -43,16 +42,19 @@ export default function ChatScreen() {
           onBackPress={handleGoBack}
         />
 
-
         {/* KHU VỰC CHAT */}
         <ChatArea />
 
         {/* INPUT */}
         {isBlocked ? (
           <View style={styles.blockedContainer}>
-            <Text style={styles.blockedText}>This user is currently blocked</Text>
+            <Text style={styles.blockedText}>
+              This user is currently blocked
+            </Text>
             <TouchableOpacity onPress={() => setShowUnblockModal(true)}>
-              <Text style={styles.unblockText}>Would you like to unblock them ?</Text>
+              <Text style={styles.unblockText}>
+                Would you like to unblock them ?
+              </Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -78,7 +80,6 @@ export default function ChatScreen() {
             setIsBlocked(false); // 👈 unblocked thành công
           }}
         />
-
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

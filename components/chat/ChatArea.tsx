@@ -15,9 +15,17 @@ type ChatAreaProps = {
 
 export default function ChatArea({
   messages = [
-    { id: '1', message: 'Xin chào bạn!', avatar: 'https://i.pravatar.cc/100?img=5' },
+    {
+      id: '1',
+      message: 'Xin chào bạn!',
+      avatar: 'https://i.pravatar.cc/100?img=5',
+    },
     { id: '2', message: 'Chào! Mình là ChatGPT 😄', isSender: true },
-    { id: '3', message: 'Thử xem component này chạy tốt chưa?', avatar: 'https://i.pravatar.cc/100?img=5' },
+    {
+      id: '3',
+      message: 'Thử xem component này chạy tốt chưa?',
+      avatar: 'https://i.pravatar.cc/100?img=5',
+    },
   ],
 }: ChatAreaProps) {
   return (

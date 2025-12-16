@@ -1,12 +1,9 @@
 import { HapticTab } from '@/components/haptic-tab';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
@@ -17,8 +14,8 @@ export default function TabLayout() {
           borderTopColor: '#e5e5e5',
           height: 60,
         },
-        tabBarActiveTintColor: 'black',        // icon/text khi chọn
-        tabBarInactiveTintColor: 'black',      // icon/text khi không chọn
+        tabBarActiveTintColor: 'black', // icon/text khi chọn
+        tabBarInactiveTintColor: 'black', // icon/text khi không chọn
         tabBarActiveBackgroundColor: '#FFD700', // vàng khi chọn
       }}
     >

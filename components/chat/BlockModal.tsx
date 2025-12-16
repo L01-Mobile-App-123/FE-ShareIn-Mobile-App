@@ -7,7 +7,11 @@ interface BlockModalProps {
   onConfirm: () => void;
 }
 
-export default function BlockModal({ visible, onClose, onConfirm }: BlockModalProps) {
+export default function BlockModal({
+  visible,
+  onClose,
+  onConfirm,
+}: BlockModalProps) {
   return (
     <Modal
       visible={visible}
@@ -19,11 +23,17 @@ export default function BlockModal({ visible, onClose, onConfirm }: BlockModalPr
         <View style={styles.dialogBox}>
           <Text style={styles.title}>DO YOU WANT TO BLOCK THIS USER ?</Text>
 
-          <TouchableOpacity style={[styles.button, styles.yesButton]} onPress={onConfirm}>
+          <TouchableOpacity
+            style={[styles.button, styles.yesButton]}
+            onPress={onConfirm}
+          >
             <Text style={styles.buttonText}>YES</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.button, styles.noButton]} onPress={onClose}>
+          <TouchableOpacity
+            style={[styles.button, styles.noButton]}
+            onPress={onClose}
+          >
             <Text style={styles.buttonText}>NO</Text>
           </TouchableOpacity>
         </View>

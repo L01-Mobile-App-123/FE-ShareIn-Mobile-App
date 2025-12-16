@@ -27,12 +27,12 @@ export default function ChatItem({ item }: ChatItemProps) {
       }
     >
       <View style={styles.card}>
-      <Image source={{ uri: item.avatar }} style={styles.avatar} />
-      <View>
-        <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.message}>{item.message}</Text>
+        <Image source={{ uri: item.avatar }} style={styles.avatar} />
+        <View>
+          <Text style={styles.name}>{item.name}</Text>
+          <Text style={styles.message}>{item.message}</Text>
+        </View>
       </View>
-    </View>
     </Pressable>
   );
 }

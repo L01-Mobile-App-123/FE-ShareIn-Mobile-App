@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "ShareIn",
-    "slug": "ShareIn",
+    "slug": "sharein",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -9,7 +9,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "Allow $(PRODUCT_NAME) to use speech recognition.",
+        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to use the microphone."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +23,11 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "static",
@@ -38,12 +46,33 @@
             "backgroundColor": "#000000"
           }
         }
-      ],
-      "expo-speech-recognition"
+      ]
+      // "expo-speech-recognition",
+      // [
+      //   "@sentry/react-native/expo",
+      //   {
+      //     "url": "https://sentry.io/",
+      //     "project": "react-native-vm",
+      //     "organization": "mobildeapp123"
+      //   }
+      // ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "698a6663-c4a0-458b-8e6e-b535f8173be0"
+      }
+    },
+    "owner": "linh.nguyenhathuy8023",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/698a6663-c4a0-458b-8e6e-b535f8173be0"
     }
   }
 }

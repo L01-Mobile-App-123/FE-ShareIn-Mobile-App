@@ -7,7 +7,11 @@ interface ChatHeaderProps {
   onBackPress?: () => void;
 }
 
-export default function ChatHeader({ onInfoPress, isBlocked, onBackPress }: ChatHeaderProps) {
+export default function ChatHeader({
+  onInfoPress,
+  isBlocked,
+  onBackPress,
+}: ChatHeaderProps) {
   return (
     <View style={styles.container}>
       <View style={styles.leftGroup}>
@@ -26,7 +30,11 @@ export default function ChatHeader({ onInfoPress, isBlocked, onBackPress }: Chat
         {/* <Ionicons name="videocam-outline" size={22} color="#000" /> */}
         {!isBlocked && (
           <TouchableOpacity onPress={onInfoPress}>
-            <Ionicons name="information-circle-outline" size={22} color="#000" />
+            <Ionicons
+              name="information-circle-outline"
+              size={22}
+              color="#000"
+            />
           </TouchableOpacity>
         )}
       </View>

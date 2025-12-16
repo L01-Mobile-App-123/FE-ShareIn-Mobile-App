@@ -1,5 +1,5 @@
-import { router } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import { router } from 'expo-router';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -10,31 +10,31 @@ import {
   Dimensions,
   NativeScrollEvent,
   NativeSyntheticEvent,
-} from "react-native";
+} from 'react-native';
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window');
 
 const slides = [
   {
-    id: "1",
-    image: require("../../assets/images/onboarding1.png"),
-    title: "Don’t let your unused items gather dust.",
+    id: '1',
+    image: require('@/assets/images/onboarding1.png'),
+    title: 'Don’t let your unused items gather dust.',
     description:
-      "ShareIN helps you buy, sell, and exchange secondhand goods easily — save money while helping the planet.",
+      'ShareIN helps you buy, sell, and exchange secondhand goods easily — save money while helping the planet.',
   },
   {
-    id: "2",
-    image: require("../../assets/images/onboarding2.png"),
-    title: "Thousands of quality items updated daily.",
+    id: '2',
+    image: require('@/assets/images/onboarding2.png'),
+    title: 'Thousands of quality items updated daily.',
     description:
-      "With ShareIN, you can shop smarter, cheaper, and safer in just a few taps.",
+      'With ShareIN, you can shop smarter, cheaper, and safer in just a few taps.',
   },
   {
-    id: "3",
-    image: require("../../assets/images/onboarding3.png"),
-    title: "Connecting people through sharing.",
+    id: '3',
+    image: require('@/assets/images/onboarding3.png'),
+    title: 'Connecting people through sharing.',
     description:
-      "Find someone who has what you need and exchange what you don’t use.",
+      'Find someone who has what you need and exchange what you don’t use.',
   },
 ];
 
@@ -54,17 +54,14 @@ export default function OnboardingScreen() {
       flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
       setCurrentIndex(nextIndex);
     } else {
-      router.replace("/Splash");
+      router.push('/Splash');
     }
   };
 
-
-  /** ✅ Bỏ qua onboarding */
   const handleSkip = () => {
-    router.replace("/Splash");
+    router.push('/Splash');
   };
 
-  /** ✅ Bổ sung getItemLayout để scrollToIndex hoạt động ổn định */
   const getItemLayout = (_: any, index: number) => ({
     length: width,
     offset: width * index,
@@ -112,7 +109,7 @@ export default function OnboardingScreen() {
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.nextBtn} onPress={handleNext}>
           <Text style={styles.nextText}>
-            {currentIndex === slides.length - 1 ? "Finish" : "Next"}
+            {currentIndex === slides.length - 1 ? 'Finish' : 'Next'}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.skipBtn} onPress={handleSkip}>
@@ -124,64 +121,64 @@ export default function OnboardingScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: '#fff' },
   slide: {
     width,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 10,
-    marginBottom: 50,
+    marginBottom: 0,
   },
-  image: { width: "100%", height: 300, marginBottom: 30, marginTop: 200,resizeMode: "contain" },
+  image: { width: '100%', height: 300, resizeMode: 'contain' },
   title: {
     fontSize: 20,
     lineHeight: 28,
-    fontWeight: "600",
-    color: "#FF9A00",
-    textAlign: "center",
+    fontWeight: '600',
+    color: '#FF9A00',
+    textAlign: 'center',
     marginBottom: 10,
   },
   desc: {
-    textAlign: "center",
-    color: "#555",
+    textAlign: 'center',
+    color: '#555',
     fontSize: 16,
     lineHeight: 24,
   },
   indicatorContainer: {
-    width: "100%",
-    alignContent: "center",
-    flexDirection: "row", 
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute", 
-    bottom: 200
+    width: '100%',
+    alignContent: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 200,
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#ddd",
+    backgroundColor: '#ddd',
     marginHorizontal: 5,
   },
   activeDot: {
-    backgroundColor: "#FF9A00",
+    backgroundColor: '#FF9A00',
     width: 20,
   },
   buttonContainer: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 100,
-    width: "100%",
-    alignItems: "center",
+    width: '100%',
+    alignItems: 'center',
   },
   nextBtn: {
-    backgroundColor: "#FF9A00",
+    backgroundColor: '#FF9A00',
     paddingVertical: 12,
     paddingHorizontal: 80,
     borderRadius: 8,
-    width: "80%",
-    alignItems: "center",
+    width: '80%',
+    alignItems: 'center',
   },
-  nextText: { color: "#fff", fontWeight: "600" },
+  nextText: { color: '#fff', fontWeight: '600' },
   skipBtn: { marginTop: 10 },
-  skipText: { color: "#FF9A00", fontWeight: "500" },
+  skipText: { color: '#FF9A00', fontWeight: '500' },
 });

@@ -20,10 +20,15 @@ export default function PostItem({ item }: PostItemProps) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Image source={{ uri: 'https://i.pravatar.cc/100?img=3' }} style={styles.avatar} />
+        <Image
+          source={{ uri: 'https://i.pravatar.cc/100?img=3' }}
+          style={styles.avatar}
+        />
         <View style={{ flex: 1 }}>
           <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.meta}>{item.time} • {item.location}</Text>
+          <Text style={styles.meta}>
+            {item.time} • {item.location}
+          </Text>
         </View>
       </View>
 
@@ -35,7 +40,10 @@ export default function PostItem({ item }: PostItemProps) {
 
       <View style={styles.imageRow}>
         {item.images.map((img, index) => (
-          <View key={index} style={[styles.imageBox, index === 1 && { flex: 2 }]}>
+          <View
+            key={index}
+            style={[styles.imageBox, index === 1 && { flex: 2 }]}
+          >
             <Text style={{ color: '#fff' }}>Image</Text>
           </View>
         ))}

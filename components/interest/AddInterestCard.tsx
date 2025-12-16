@@ -1,16 +1,22 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 
 export default function AddInterestCard() {
-  const [category, setCategory] = useState("");
-  const [keyword, setKeyword] = useState("");
+  const [category, setCategory] = useState('');
+  const [keyword, setKeyword] = useState('');
 
   const handleAddInterest = () => {
     if (!category || !keyword) {
-      alert("Please fill in both fields");
+      alert('Please fill in both fields');
       return;
     }
-    console.log("New interest:", { category, keyword });
+    console.log('New interest:', { category, keyword });
     // TODO: Call API here
   };
 
@@ -56,27 +62,27 @@ export default function AddInterestCard() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 24,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 3,
-    alignItems: "stretch",
+    alignItems: 'stretch',
     marginHorizontal: 16,
     marginTop: 20,
   },
   title: {
     fontSize: 16,
-    fontWeight: "700",
-    color: "#FF9F0A",
-    textAlign: "center",
+    fontWeight: '700',
+    color: '#FF9F0A',
+    textAlign: 'center',
     marginBottom: 4,
   },
   subtitle: {
-    textAlign: "center",
-    color: "#555",
+    textAlign: 'center',
+    color: '#555',
     fontSize: 15,
     marginBottom: 20,
   },
@@ -85,30 +91,30 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
+    fontWeight: '600',
+    color: '#333',
     marginBottom: 6,
   },
   required: {
-    color: "#FF9A00",
+    color: '#FF9A00',
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: '#ddd',
     borderRadius: 10,
     padding: 12,
     fontSize: 16,
   },
   button: {
-    backgroundColor: "#FF9A00",
+    backgroundColor: '#FF9A00',
     borderRadius: 10,
     paddingVertical: 14,
     marginTop: 12,
   },
   buttonText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 16,
-    fontWeight: "700",
-    textAlign: "center",
+    fontWeight: '700',
+    textAlign: 'center',
   },
 });

@@ -1,38 +1,42 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import { View, ActivityIndicator } from 'react-native';
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const [ready, setReady] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(true);
+
+  useEffect(() => {
+    checkOnboarding();
+  }, []);
+
+  const checkOnboarding = async () => {
+    const seen = await AsyncStorage.getItem('onboarding_seen');
+    setShowOnboarding(!seen);
+    setReady(true);
+  };
+
+  if (!ready) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-
-        <Stack.Screen
-          name="ChatScreen"
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="FilterScreen"
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="InterestScreen"
-          options={{ headerShown: false }}
-        />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Stack
+      screenOptions={{ headerShown: false }}
+      initialRouteName={showOnboarding ? 'Onboarding' : '(auth)'}
+    >
+      <Stack.Screen name="Onboarding" />
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="ChatScreen" />
+      <Stack.Screen name="FilterScreen" />
+      <Stack.Screen name="InterestScreen" />
+      <Stack.Screen name="ProfileSetting" />
+    </Stack>
   );
 }

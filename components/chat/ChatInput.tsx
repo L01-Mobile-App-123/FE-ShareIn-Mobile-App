@@ -2,13 +2,13 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import {
-    Alert,
-    FlatList,
-    Image,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  Image,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function ChatInput() {
@@ -19,7 +19,10 @@ export default function ChatInput() {
   const handleOpenGallery = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission denied', 'Bạn cần cho phép truy cập thư viện ảnh');
+      Alert.alert(
+        'Permission denied',
+        'Bạn cần cho phép truy cập thư viện ảnh',
+      );
       return;
     }
 
@@ -28,8 +31,8 @@ export default function ChatInput() {
       allowsMultipleSelection: true, // ✅ chọn nhiều ảnh
       quality: 0.8,
       // 2 dòng dưới là để cắt ảnh
-    //   allowsEditing: true,
-    //   aspect: [4, 3],
+      //   allowsEditing: true,
+      //   aspect: [4, 3],
     });
 
     if (!result.canceled) {
@@ -50,8 +53,8 @@ export default function ChatInput() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.8,
       // 2 dòng dưới là để cắt ảnh
-    //   allowsEditing: true,
-    //   aspect: [4, 3],
+      //   allowsEditing: true,
+      //   aspect: [4, 3],
     });
 
     if (!result.canceled) {
