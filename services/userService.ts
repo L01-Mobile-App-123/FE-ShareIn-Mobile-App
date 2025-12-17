@@ -57,8 +57,6 @@ export const UserService = {
       }),
     );
 
-    console.log('Updated user:', user.data);
-
     return {
       ...user.data,
       avatar_url:

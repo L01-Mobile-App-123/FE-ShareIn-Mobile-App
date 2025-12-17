@@ -16,6 +16,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import * as ImagePicker from "expo-image-picker";
 
 import { useEffect, useState } from 'react';
 import { UserService, UserProfile } from '@/services/userService';
@@ -64,6 +65,29 @@ export default function SettingScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const pickAvatar = async () => {
+    // xin quyền
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      alert("Cần quyền truy cập thư viện ảnh");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (result.canceled) return;
+
+    const file = result.assets[0];
+
+    // gọi API update avatar
+    await UserService.updateAvatar(file);
   };
 
   const handleUpdate = async () => {
@@ -133,7 +157,12 @@ export default function SettingScreen() {
           </TouchableOpacity>
 
           <Text style={styles.headerTitle}>Profile Settings</Text>
-          <Image source={{ uri: user?.avatar_url }} style={styles.avatar} />
+          <TouchableOpacity onPress={pickAvatar}>
+            <Image
+              source={{ uri: user?.avatar_url }}
+              style={styles.avatar}
+            />
+          </TouchableOpacity>
         </LinearGradient>
 
         <View style={styles.content}>
@@ -141,6 +170,7 @@ export default function SettingScreen() {
             You can update your profile information below.
           </Text>
 
+          <Text style={styles.label}>Name</Text>
           <TextInput
             style={styles.input}
             placeholder="Name"
@@ -148,6 +178,7 @@ export default function SettingScreen() {
             onChangeText={setName}
           />
 
+          <Text style={styles.label}>Phone number</Text>
           <TextInput
             style={styles.input}
             placeholder="Phone"
@@ -157,6 +188,7 @@ export default function SettingScreen() {
             keyboardType="phone-pad"
           />
 
+          <Text style={styles.label}>School Name</Text>
           <TextInput
             style={styles.input}
             placeholder="School Name"
@@ -164,6 +196,7 @@ export default function SettingScreen() {
             onChangeText={setSchoolName}
           />
 
+          <Text style={styles.label}>Dormitory</Text>
           <TextInput
             style={styles.input}
             placeholder="Dormitory"
@@ -171,6 +204,7 @@ export default function SettingScreen() {
             onChangeText={setDormitory}
           />
 
+          <Text style={styles.label}>Date of Birth</Text>
           <TextInput
             style={styles.input}
             placeholder="Date of Birth (YYYY-MM-DD)"
@@ -178,6 +212,7 @@ export default function SettingScreen() {
             onChangeText={setDateOfBirth}
           />
 
+          <Text style={styles.label}>Academic Year</Text>
           <TextInput
             style={styles.input}
             placeholder="Academic Year"
@@ -233,7 +268,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '700',
     textAlign: 'center',
-    marginTop: 15,
+    justifyContent: 'center',
+    marginBottom: 10,
   },
 
   avatar: {
@@ -263,6 +299,12 @@ const styles = StyleSheet.create({
     color: '#555',
     marginTop: 5,
     marginBottom: 15,
+  },
+
+  label: {
+    fontSize: 14,
+    color: '#555',
+    fontWeight: '600',
   },
 
   input: {
