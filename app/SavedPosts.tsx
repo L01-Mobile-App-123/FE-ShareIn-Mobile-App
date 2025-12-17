@@ -5,29 +5,28 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 const MOCK_DATA = [
   {
-    id: "1",
-    user: "Gia Nguyễn",
-    avatar: "https://i.pravatar.cc/100",
-    time: "13 hrs ago",
-    location: "HCM City",
+    id: '1',
+    user: 'Gia Nguyễn',
+    avatar: 'https://i.pravatar.cc/100',
+    time: '13 hrs ago',
+    location: 'HCM City',
     description:
-      "Mình có cái nồi cơm điện Sharp 1.8L, mua tầm 2 năm rồi, vẫn dùng tốt...",
+      'Mình có cái nồi cơm điện Sharp 1.8L, mua tầm 2 năm rồi, vẫn dùng tốt...',
     likes: 12,
     images: [1, 2, 3],
   },
   {
-    id: "2",
-    user: "Gia Nguyễn",
-    avatar: "https://i.pravatar.cc/100",
-    time: "13 hrs ago",
-    location: "HCM City",
-    description:
-      "Mình có cái nồi cơm điện Sharp 1.8L, mua tầm 2 năm rồi...",
+    id: '2',
+    user: 'Gia Nguyễn',
+    avatar: 'https://i.pravatar.cc/100',
+    time: '13 hrs ago',
+    location: 'HCM City',
+    description: 'Mình có cái nồi cơm điện Sharp 1.8L, mua tầm 2 năm rồi...',
     likes: 12,
     images: [1, 2],
   },
@@ -90,7 +89,7 @@ function PostCard({ post }: any) {
       <View style={styles.imageGrid}>
         {post.images.map((i: number) => (
           <View key={i} style={styles.imageBox}>
-            <Text style={{ color: "white" }}>Image</Text>
+            <Text style={{ color: 'white' }}>Image</Text>
           </View>
         ))}
       </View>
@@ -119,35 +118,35 @@ function PostCard({ post }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
 
   header: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderColor: "#eee",
+    borderColor: '#eee',
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: '600',
     marginLeft: 8,
   },
 
   card: {
     padding: 16,
     borderBottomWidth: 1,
-    borderColor: "#eee",
+    borderColor: '#eee',
   },
 
   row: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   rowBetween: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 
   avatar: {
@@ -158,20 +157,20 @@ const styles = StyleSheet.create({
   },
 
   username: {
-    fontWeight: "600",
+    fontWeight: '600',
   },
   meta: {
     fontSize: 12,
-    color: "#777",
+    color: '#777',
   },
 
   badgeRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 4,
   },
   badge: {
-    backgroundColor: "#FFD84D",
+    backgroundColor: '#FFD84D',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -179,11 +178,11 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 12,
-    fontWeight: "500",
+    fontWeight: '500',
   },
 
   starRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
   },
 
   desc: {
@@ -192,30 +191,30 @@ const styles = StyleSheet.create({
   },
 
   imageGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
   },
   imageBox: {
-    width: "48%",
+    width: '48%',
     height: 90,
-    backgroundColor: "#F4A63B",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: '#F4A63B',
+    justifyContent: 'center',
+    alignItems: 'center',
     borderRadius: 6,
   },
 
   actionRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginTop: 12,
   },
 
   saveBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFD84D",
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFD84D',
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,

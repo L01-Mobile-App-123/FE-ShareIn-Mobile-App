@@ -10,12 +10,12 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
-          backgroundColor: "white",
-          borderTopColor: "#e5e5e5",
+          backgroundColor: 'white',
+          borderTopColor: '#e5e5e5',
           height: 60,
         },
-        tabBarActiveTintColor: "black",
-        tabBarInactiveTintColor: "black",
+        tabBarActiveTintColor: 'black',
+        tabBarInactiveTintColor: 'black',
 
         tabBarItemStyle: {
           marginVertical: 8,

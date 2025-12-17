@@ -10,24 +10,36 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import AddInterestCard from './AddInterestCard';
-import { InterestItem, UserInterest, UserInterestService } from '@/services/userInterestService';
+import {
+  InterestItem,
+  UserInterest,
+  UserInterestService,
+} from '@/services/userInterestService';
 import { CATEGORY_UI_MAP } from '@/constants/category';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
-export default function InterestListScreen({
-  query,
-  onChangeQuery,
-}: {
-  query: string;
-  onChangeQuery: (text: string) => void;
-}) {
+export default function InterestListScreen() {
   const [showAddInterestCard, setShowAddInterestCard] = useState(false);
 
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [interests, setInterests] = useState<InterestItem[]>([]);
-  
+
+  const [query, setQuery] = useState('');
+
+  const handleSearch = (text: string) => {
+    setQuery(text);
+    if (text.trim() === '') {
+      loadUserInterests();
+      return;
+    }
+    const filtered = interests.filter((item) =>
+      item.keyWord.toLowerCase().includes(text.toLowerCase()),
+    );
+    setInterests(filtered);
+  };
+
   const onRefresh = async () => {
     try {
       setRefreshing(true);
@@ -53,7 +65,9 @@ export default function InterestListScreen({
   };
 
   const handleDelete = async (categoryId: string, keyWord: string) => {
-    setInterests((prev) => prev.filter((item) => item.id !== `${categoryId}-${keyWord}`));
+    setInterests((prev) =>
+      prev.filter((item) => item.id !== `${categoryId}-${keyWord}`),
+    );
     try {
       setLoading(true);
       await UserInterestService.deleteUserInterest(categoryId, keyWord);
@@ -66,22 +80,15 @@ export default function InterestListScreen({
     }
   };
 
-  const renderItem = ({ item }: { item: InterestItem}) => {
+  const renderItem = ({ item }: { item: InterestItem }) => {
     const ui =
       CATEGORY_UI_MAP[item.category_id] ??
-      CATEGORY_UI_MAP["55555555-5555-5555-5555-555555555555"];
+      CATEGORY_UI_MAP['55555555-5555-5555-5555-555555555555'];
 
     return (
       <View style={styles.item}>
-        <LinearGradient
-          colors={ui.colors}
-          style={styles.iconBox}
-        >
-          <Ionicons
-            name={ui.icon as any}
-            size={22}
-            color="white"
-          />
+        <LinearGradient colors={ui.colors} style={styles.iconBox}>
+          <Ionicons name={ui.icon as any} size={22} color="white" />
         </LinearGradient>
 
         <View style={{ flex: 1, marginLeft: 10 }}>
@@ -107,7 +114,7 @@ export default function InterestListScreen({
         renderItem={renderItem}
         contentContainerStyle={{
           paddingBottom: 40,
-          flexGrow: 1,          // QUAN TRỌNG
+          flexGrow: 1, // QUAN TRỌNG
         }}
         refreshing={refreshing}
         onRefresh={onRefresh}
@@ -135,7 +142,7 @@ export default function InterestListScreen({
                 <Text style={styles.label}>Search query</Text>
                 <TextInput
                   value={query}
-                  onChangeText={onChangeQuery}
+                  onChangeText={handleSearch}
                   placeholder="Enter keyword..."
                   style={styles.input}
                 />
@@ -143,17 +150,20 @@ export default function InterestListScreen({
             </View>
 
             <Text style={styles.label}>
-              Your interests <Text style={{color: 'red'}}>({interests.length})</Text>
+              Your interests{' '}
+              <Text style={{ color: 'red' }}>({interests.length})</Text>
             </Text>
           </>
         }
         ListEmptyComponent={
           !loading ? (
-            <Text style={{
-              textAlign: "center",
-              marginTop: 50,
-              color: "#999",
-            }}>
+            <Text
+              style={{
+                textAlign: 'center',
+                marginTop: 50,
+                color: '#999',
+              }}
+            >
               No interests found. Please add your interests.
             </Text>
           ) : null
@@ -213,8 +223,8 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   itemTitle: {
     fontSize: 16,

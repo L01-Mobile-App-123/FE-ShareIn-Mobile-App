@@ -12,10 +12,14 @@ import {
   Pressable,
   Modal,
   ActivityIndicator,
-  Alert
+  Alert,
 } from 'react-native';
 
-export default function AddInterestCard({ isFullWidth }: { isFullWidth?: boolean }) {
+export default function AddInterestCard({
+  isFullWidth,
+}: {
+  isFullWidth?: boolean;
+}) {
   const [keyword, setKeyword] = useState('');
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -45,26 +49,22 @@ export default function AddInterestCard({ isFullWidth }: { isFullWidth?: boolean
 
     return (
       <View style={styles.selectedRow}>
-        <LinearGradient
-          colors={ui.colors}
-          style={styles.iconBox}
-        >
-          <Ionicons
-            name={ui.icon as any}
-            size={16}
-            color="white"
-          />
+        <LinearGradient colors={ui.colors} style={styles.iconBox}>
+          <Ionicons name={ui.icon as any} size={16} color="white" />
         </LinearGradient>
 
-        <Text style={styles.selectedText}>
-          {ui.label}
-        </Text>
+        <Text style={styles.selectedText}>{ui.label}</Text>
       </View>
     );
   };
 
   return (
-    <View style={[styles.container, isFullWidth ? { marginHorizontal: 0 } : { marginHorizontal: 16 }]} >
+    <View
+      style={[
+        styles.container,
+        isFullWidth ? { marginHorizontal: 0 } : { marginHorizontal: 16 },
+      ]}
+    >
       {/* Header */}
       <Text style={styles.title}>NOT FOUND</Text>
       <Text style={styles.subtitle}>Do you want to add it to Interest?</Text>
@@ -75,16 +75,11 @@ export default function AddInterestCard({ isFullWidth }: { isFullWidth?: boolean
           Category <Text style={styles.required}>*</Text>
         </Text>
 
-        <Pressable
-          style={styles.dropdown}
-          onPress={() => setOpen(true)}
-        >
+        <Pressable style={styles.dropdown} onPress={() => setOpen(true)}>
           {categoryId ? (
             <SelectedCategory id={categoryId} />
           ) : (
-            <Text style={styles.placeholder}>
-              Select category
-            </Text>
+            <Text style={styles.placeholder}>Select category</Text>
           )}
         </Pressable>
       </View>
@@ -116,10 +111,7 @@ export default function AddInterestCard({ isFullWidth }: { isFullWidth?: boolean
       </TouchableOpacity>
 
       <Modal visible={open} transparent animationType="fade">
-        <Pressable
-          style={styles.overlay}
-          onPress={() => setOpen(false)}
-        >
+        <Pressable style={styles.overlay} onPress={() => setOpen(false)}>
           <View style={styles.sheet}>
             {CATEGORY_OPTIONS.map((item) => (
               <Pressable
@@ -134,16 +126,10 @@ export default function AddInterestCard({ isFullWidth }: { isFullWidth?: boolean
                   colors={item.colors}
                   style={[styles.iconBox, { width: 44, height: 44 }]}
                 >
-                  <Ionicons
-                    name={item.icon as any}
-                    size={16}
-                    color="white"
-                  />
+                  <Ionicons name={item.icon as any} size={16} color="white" />
                 </LinearGradient>
 
-                <Text style={styles.optionText}>
-                  {item.label}
-                </Text>
+                <Text style={styles.optionText}>{item.label}</Text>
               </Pressable>
             ))}
           </View>
@@ -212,47 +198,47 @@ const styles = StyleSheet.create({
 
   dropdown: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: '#ddd',
     borderRadius: 10,
     padding: 12,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
 
-  placeholder: { color: "#999" },
+  placeholder: { color: '#999' },
 
   selectedRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   selectedText: {
     marginLeft: 8,
-    fontWeight: "500",
+    fontWeight: '500',
   },
 
   iconBox: {
     width: 30,
     height: 30,
     borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.3)",
-    justifyContent: "center",
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
     padding: 24,
   },
 
   sheet: {
-    backgroundColor: "white",
+    backgroundColor: 'white',
     borderRadius: 14,
     padding: 12,
   },
 
   option: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 5,
   },
   optionText: {

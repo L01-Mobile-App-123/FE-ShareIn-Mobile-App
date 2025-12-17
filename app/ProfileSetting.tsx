@@ -16,7 +16,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import * as ImagePicker from "expo-image-picker";
+import * as ImagePicker from 'expo-image-picker';
 
 import { useEffect, useState } from 'react';
 import { UserService, UserProfile } from '@/services/userService';
@@ -70,8 +70,8 @@ export default function SettingScreen() {
   const pickAvatar = async () => {
     // xin quyền
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      alert("Cần quyền truy cập thư viện ảnh");
+    if (status !== 'granted') {
+      alert('Cần quyền truy cập thư viện ảnh');
       return;
     }
 
@@ -158,10 +158,7 @@ export default function SettingScreen() {
 
           <Text style={styles.headerTitle}>Profile Settings</Text>
           <TouchableOpacity onPress={pickAvatar}>
-            <Image
-              source={{ uri: user?.avatar_url }}
-              style={styles.avatar}
-            />
+            <Image source={{ uri: user?.avatar_url }} style={styles.avatar} />
           </TouchableOpacity>
         </LinearGradient>
 
