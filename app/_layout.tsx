@@ -37,6 +37,7 @@ export default function RootLayout() {
       <Stack.Screen name="FilterScreen" />
       <Stack.Screen name="InterestScreen" />
       <Stack.Screen name="ProfileSetting" />
+      <Stack.Screen name="SavedPosts" />
     </Stack>
   );
 }

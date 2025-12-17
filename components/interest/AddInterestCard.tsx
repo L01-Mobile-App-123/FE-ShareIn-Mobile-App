@@ -1,3 +1,7 @@
+import { CATEGORY_OPTIONS, CATEGORY_UI_MAP } from '@/constants/category';
+import { UserInterestService } from '@/services/userInterestService';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import {
   View,
@@ -5,23 +9,62 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Pressable,
+  Modal,
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 
-export default function AddInterestCard() {
-  const [category, setCategory] = useState('');
+export default function AddInterestCard({ isFullWidth }: { isFullWidth?: boolean }) {
   const [keyword, setKeyword] = useState('');
+  const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleAddInterest = () => {
-    if (!category || !keyword) {
+  const handleAddInterest = async () => {
+    if (!categoryId || !keyword) {
       alert('Please fill in both fields');
       return;
     }
-    console.log('New interest:', { category, keyword });
-    // TODO: Call API here
+    try {
+      setLoading(true);
+      await UserInterestService.addUserInterest(categoryId, keyword);
+      Alert.alert('Success', 'Interest added successfully!');
+      setKeyword('');
+      setCategoryId(null);
+    } catch (err) {
+      Alert.alert('Error', 'Failed to add interest. Please try again.');
+      console.log('Failed to update user interest:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const SelectedCategory = ({ id }: { id: string }) => {
+    const ui = CATEGORY_UI_MAP[id];
+
+    return (
+      <View style={styles.selectedRow}>
+        <LinearGradient
+          colors={ui.colors}
+          style={styles.iconBox}
+        >
+          <Ionicons
+            name={ui.icon as any}
+            size={16}
+            color="white"
+          />
+        </LinearGradient>
+
+        <Text style={styles.selectedText}>
+          {ui.label}
+        </Text>
+      </View>
+    );
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isFullWidth ? { marginHorizontal: 0 } : { marginHorizontal: 16 }]} >
       {/* Header */}
       <Text style={styles.title}>NOT FOUND</Text>
       <Text style={styles.subtitle}>Do you want to add it to Interest?</Text>
@@ -31,12 +74,19 @@ export default function AddInterestCard() {
         <Text style={styles.label}>
           Category <Text style={styles.required}>*</Text>
         </Text>
-        <TextInput
-          style={styles.input}
-          value={category}
-          onChangeText={setCategory}
-          placeholder="Enter category"
-        />
+
+        <Pressable
+          style={styles.dropdown}
+          onPress={() => setOpen(true)}
+        >
+          {categoryId ? (
+            <SelectedCategory id={categoryId} />
+          ) : (
+            <Text style={styles.placeholder}>
+              Select category
+            </Text>
+          )}
+        </Pressable>
       </View>
 
       {/* Keyword input */}
@@ -53,9 +103,52 @@ export default function AddInterestCard() {
       </View>
 
       {/* Button */}
-      <TouchableOpacity style={styles.button} onPress={handleAddInterest}>
-        <Text style={styles.buttonText}>Add new interest</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleAddInterest}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Add Interest</Text>
+        )}
       </TouchableOpacity>
+
+      <Modal visible={open} transparent animationType="fade">
+        <Pressable
+          style={styles.overlay}
+          onPress={() => setOpen(false)}
+        >
+          <View style={styles.sheet}>
+            {CATEGORY_OPTIONS.map((item) => (
+              <Pressable
+                key={item.id}
+                style={styles.option}
+                onPress={() => {
+                  setCategoryId(item.id);
+                  setOpen(false);
+                }}
+              >
+                <LinearGradient
+                  colors={item.colors}
+                  style={[styles.iconBox, { width: 44, height: 44 }]}
+                >
+                  <Ionicons
+                    name={item.icon as any}
+                    size={16}
+                    color="white"
+                  />
+                </LinearGradient>
+
+                <Text style={styles.optionText}>
+                  {item.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -70,7 +163,6 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 3,
     alignItems: 'stretch',
-    marginHorizontal: 16,
     marginTop: 20,
   },
   title: {
@@ -116,5 +208,54 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     textAlign: 'center',
+  },
+
+  dropdown: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 10,
+    padding: 12,
+    justifyContent: "center",
+  },
+
+  placeholder: { color: "#999" },
+
+  selectedRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  selectedText: {
+    marginLeft: 8,
+    fontWeight: "500",
+  },
+
+  iconBox: {
+    width: 30,
+    height: 30,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    padding: 24,
+  },
+
+  sheet: {
+    backgroundColor: "white",
+    borderRadius: 14,
+    padding: 12,
+  },
+
+  option: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 5,
+  },
+  optionText: {
+    marginLeft: 10,
   },
 });

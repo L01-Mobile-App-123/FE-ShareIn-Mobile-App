@@ -84,6 +84,10 @@ class ApiClient {
     const token = await this.getFirebaseToken();
     const query = this.buildQuery(params);
 
+    if (path == '/api/v1/auth/verify') {
+      console.log('TOKEN:', token);
+    }
+
     const res = await fetch(`${this.API_URL}${path}${query}`, {
       ...options,
       headers: {

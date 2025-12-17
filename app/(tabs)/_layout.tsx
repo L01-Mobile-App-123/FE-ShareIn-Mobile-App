@@ -10,13 +10,18 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
-          backgroundColor: 'white',
-          borderTopColor: '#e5e5e5',
+          backgroundColor: "white",
+          borderTopColor: "#e5e5e5",
           height: 60,
         },
-        tabBarActiveTintColor: 'black', // icon/text khi chọn
-        tabBarInactiveTintColor: 'black', // icon/text khi không chọn
-        tabBarActiveBackgroundColor: '#FFD700', // vàng khi chọn
+        tabBarActiveTintColor: "black",
+        tabBarInactiveTintColor: "black",
+
+        tabBarItemStyle: {
+          marginVertical: 8,
+          marginHorizontal: 12,
+          borderRadius: 20,
+        },
       }}
     >
       <Tabs.Screen

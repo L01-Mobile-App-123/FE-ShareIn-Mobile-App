@@ -49,15 +49,17 @@ export default function SettingScreen() {
   const menuItems = [
     {
       title: 'Setting profile',
-      icon: 'person-outline',
       route: '/ProfileSetting',
     },
     {
       title: 'List of interest',
-      icon: 'heart-outline',
       route: '/InterestScreen',
     },
-    { title: 'Sign out', icon: 'log-out-outline', route: '/Onboarding' },
+    {
+      title: 'Saved posts',
+      route: '/SavedPosts',
+    },
+    { title: 'Sign out', route: '/Onboarding' },
   ];
 
   return (

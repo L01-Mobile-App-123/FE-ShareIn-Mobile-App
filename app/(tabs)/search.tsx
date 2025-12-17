@@ -92,7 +92,7 @@ export default function SearchScreen({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
-      {postListVisible ? <PostList /> : <AddInterestCard />}
+      {postListVisible ? <PostList /> : <AddInterestCard isFullWidth={false} />}
     </View>
   );
 }
