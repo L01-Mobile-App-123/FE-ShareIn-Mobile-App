@@ -1,62 +1,142 @@
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+// 1. Định nghĩa Interface cho dữ liệu
 export interface Post {
-  id: string;
-  name: string;
-  time: string;
+  user_id: string;
+  authorName: string;
+  avatarUrl: string;
+  timestamp: string;
   location: string;
   tag: string;
+  rating: number;
   content: string;
   images: string[];
+  likesCount: number;
 }
 
 interface PostItemProps {
   item: Post;
+  onLike?: (user_id: string) => void;
+  onSave?: (user_id: string) => void;
+  onChat?: (user_id: string) => void;
 }
 
-export default function PostItem({ item }: PostItemProps) {
+export default function PostItem({
+  item,
+  onLike,
+  onSave,
+  onChat,
+}: PostItemProps) {
+  // 1. Thêm state cho nút like và save
+  const [liked, setLiked] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const router = useRouter();
+
+  // 2. Sửa handleLikePress
+  const handleLikePress = () => {
+    setLiked(!liked);
+    onLike?.(item.user_id); // gọi API nếu cần
+  };
+
+  // 3. Sửa handleSavePress
+  const handleSavePress = () => {
+    setSaved(!saved);
+    onSave?.(item.user_id); // gọi API nếu cần
+  };
+
+  // 4. Sửa handleChatPress
+  const handleChatPress = () => {
+    onChat?.(item.user_id);
+    router.push({
+      pathname: '/ChatScreen',
+      params: {
+        id: item.user_id,
+        name: item.authorName,
+        avatar: item.avatarUrl,
+      },
+    });
+  };
+
   return (
     <View style={styles.card}>
+      {/* Header: Avatar, Name, Time, Location và Stars */}
       <View style={styles.header}>
-        <Image
-          source={{ uri: 'https://i.pravatar.cc/100?img=3' }}
-          style={styles.avatar}
-        />
-        <View style={{ flex: 1 }}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.meta}>
-            {item.time} • {item.location}
-          </Text>
+        <Image source={{ uri: item.avatarUrl }} style={styles.avatar} />
+
+        <View style={styles.headerInfo}>
+          <View style={styles.nameRow}>
+            <Text style={styles.name}>{item.authorName}</Text>
+            <Text style={styles.metaText}>
+              {item.timestamp} • {item.location}
+            </Text>
+          </View>
+
+          {/* Phần Rating Stars */}
+          <View style={styles.ratingRow}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Ionicons
+                key={star}
+                name={star <= item.rating ? 'star' : 'star-outline'}
+                size={20}
+                color="black"
+              />
+            ))}
+          </View>
         </View>
       </View>
 
+      {/* Tag: Give away */}
       <View style={styles.tagContainer}>
-        <Text style={styles.tag}>{item.tag}</Text>
+        <Text style={styles.tagText}>{item.tag}</Text>
       </View>
 
-      <Text style={styles.content}>{item.content}</Text>
+      {/* Content */}
+      <Text style={styles.contentText}>{item.content}</Text>
 
-      <View style={styles.imageRow}>
-        {item.images.map((img, index) => (
-          <View
-            key={index}
-            style={[styles.imageBox, index === 1 && { flex: 2 }]}
-          >
-            <Text style={{ color: '#fff' }}>Image</Text>
+      {/* Image Grid thay thế cho MasonryList */}
+      <View style={styles.imageGrid}>
+        {item.images.length > 0 && (
+          <View style={styles.imageContainer}>
+            {item.images.map((uri, index) => (
+              <Image
+                key={index}
+                source={{ uri }}
+                style={[
+                  styles.imageItem,
+                  { width: item.images.length === 1 ? '100%' : '48.5%' },
+                ]}
+              />
+            ))}
           </View>
-        ))}
+        )}
       </View>
 
+      {/* Footer: Like, Chat, Save */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.footerBtn}>
-          <Ionicons name="heart-outline" size={20} color="black" />
-          <Text style={{ marginLeft: 4 }}>13</Text>
+        <TouchableOpacity style={styles.footerBtn} onPress={handleLikePress}>
+          <Ionicons
+            name={liked ? 'heart' : 'heart-outline'}
+            size={24}
+            color={liked ? 'red' : 'black'}
+          />
+          <Text>{liked ? item.likesCount + 1 : item.likesCount}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.footerBtn}>
-          <Ionicons name="bookmark-outline" size={20} color="black" />
-          <Text style={{ marginLeft: 4 }}>Save</Text>
+
+        <TouchableOpacity style={styles.footerBtn} onPress={handleChatPress}>
+          <Ionicons name="chatbubble-outline" size={22} color="black" />
+          <Text style={styles.footerBtnText}>Chat</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.footerBtn} onPress={handleSavePress}>
+          <Ionicons
+            name={saved ? 'bookmark' : 'bookmark-outline'}
+            size={22}
+            color={saved ? 'blue' : 'black'}
+          />
+          <Text>{saved ? 'Saved' : 'Save'}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -65,40 +145,125 @@ export default function PostItem({ item }: PostItemProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFF9E5',
-    borderRadius: 15,
-    marginBottom: 15,
-    padding: 12,
+    backgroundColor: 'white',
+    padding: 16,
+    borderRadius: 8,
+    marginVertical: 8,
   },
-  header: { flexDirection: 'row', alignItems: 'center' },
-  avatar: { width: 40, height: 40, borderRadius: 20, marginRight: 10 },
-  name: { fontWeight: 'bold', fontSize: 16 },
-  meta: { color: '#666', fontSize: 12 },
-  tagContainer: { marginTop: 6, alignSelf: 'flex-start' },
-  tag: {
-    backgroundColor: '#FFDD57',
-    color: '#000',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
-    fontSize: 12,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#ddd',
+  },
+  headerInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  name: {
+    fontSize: 18,
     fontWeight: '600',
+    color: '#000',
   },
-  content: { marginTop: 6, fontSize: 14, color: '#333' },
-  imageRow: { flexDirection: 'row', gap: 6, marginTop: 8 },
-  imageBox: {
+  metaText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    marginTop: 4,
+  },
+  tagContainer: {
+    marginTop: 12,
+    backgroundColor: '#FFDD57', // Màu vàng giống hình
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+  },
+  tagText: {
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+  contentText: {
+    marginTop: 12,
+    fontSize: 16,
+    lineHeight: 22,
+    color: '#222',
+  },
+  imageGrid: {
+    marginTop: 12,
+    width: '100%',
+  },
+  imageContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 8, // Khoảng cách giữa các ảnh
+  },
+  imageItem: {
+    height: 200, // Bạn có thể tùy chỉnh chiều cao cố định hoặc dùng aspect ratio
+    borderRadius: 8,
+    backgroundColor: '#eee',
+    marginBottom: 8,
+  },
+  leftColumn: {
+    flex: 1,
+    gap: 10,
+  },
+  rightColumn: {
+    flex: 1,
+  },
+  smallImageBox: {
     flex: 1,
     backgroundColor: '#FFA500',
-    borderRadius: 10,
-    height: 80,
-    alignItems: 'center',
+    borderRadius: 4,
     justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  largeImageBox: {
+    flex: 1,
+    backgroundColor: '#FFA500',
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+  },
+  placeholderText: {
+    color: 'white',
+    fontWeight: '500',
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
-    paddingHorizontal: 6,
+    marginTop: 20,
+    paddingTop: 10,
+    borderTopWidth: 0.5,
+    borderTopColor: '#eee',
   },
-  footerBtn: { flexDirection: 'row', alignItems: 'center' },
+  footerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  footerBtnText: {
+    fontSize: 15,
+    color: '#444',
+    fontWeight: '500',
+  },
 });

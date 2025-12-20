@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   },
   content: {
     backgroundColor: 'white',
-    flex: 1,
+    // flex: 1,
     paddingTop: 20,
     paddingHorizontal: 16,
   },

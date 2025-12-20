@@ -1,23 +1,23 @@
+import { auth } from '@/config/firebase';
+import { UserService } from '@/services/userService';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import React, { useState } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Image,
-  Alert,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
+  View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { auth } from '@/config/firebase';
-import { UserService } from '@/services/userService';
 
 export default function SignUpScreen() {
   const [name, setName] = useState('');
@@ -289,6 +289,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#555',
     fontSize: 14,
+    paddingBottom: 100,
   },
 
   passwordWrapper: {

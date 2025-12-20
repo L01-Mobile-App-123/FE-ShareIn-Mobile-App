@@ -1,15 +1,15 @@
 import PostList from '@/components/home/PostList';
+import AddInterestCard from '@/components/interest/AddInterestCard';
+import { Ionicons } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  View,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
+  View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
-import AddInterestCard from '@/components/interest/AddInterestCard';
 
 export default function SearchScreen({ navigation }: any) {
   const [query, setQuery] = useState('');

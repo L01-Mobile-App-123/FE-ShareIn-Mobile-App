@@ -1,85 +1,68 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
-
-import {
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View, // 👈 import đúng
-} from 'react-native';
+import { useEffect, useState } from 'react';
+import { KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import BlockModal from '@/components/chat/BlockModal'; // 👈 modal riêng
-import ChatArea from '@/components/chat/ChatArea';
+import ChatArea, { ChatMessage } from '@/components/chat/ChatArea';
 import ChatHeader from '@/components/chat/ChatHeader';
 import ChatInput from '@/components/chat/ChatInput';
-import UnblockBlockModal from '@/components/chat/UnblockModal';
+
+// Hàm mock API
+function fetchMockMessages(userId: string): Promise<ChatMessage[]> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve([
+        {
+          id: '1',
+          message: 'Xin chào bạn!',
+          avatar: 'https://i.pravatar.cc/100?img=5',
+        },
+        { id: '2', message: 'Chào! Mình là ChatGPT 😄', isSender: true },
+        {
+          id: '3',
+          message: 'Thử xem component này chạy tốt chưa?',
+          avatar: 'https://i.pravatar.cc/100?img=5',
+        },
+      ]);
+    }, 500); // giả lập delay 0.5s
+  });
+}
 
 export default function ChatScreen() {
   const [showBlockModal, setShowBlockModal] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
   const [showUnblockModal, setShowUnblockModal] = useState(false);
 
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+
   const router = useRouter();
   const { id, name, avatar } = useLocalSearchParams();
 
   const handleGoBack = () => {
-    router.push('/(tabs)/chat'); // hoặc router.replace('/(tabs)/chat');
+    router.push('/(tabs)/chat');
   };
+
+  // Lấy dữ liệu mock
+  useEffect(() => {
+    fetchMockMessages(id as string).then((data) => setMessages(data));
+  }, [id]);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        {/* HEADER */}
         <ChatHeader
           isBlocked={isBlocked}
           onInfoPress={() => setShowBlockModal(true)}
           onBackPress={handleGoBack}
         />
 
-        {/* KHU VỰC CHAT */}
-        <ChatArea />
+        {/* ChatArea nhận messages từ state */}
+        <ChatArea messages={messages} />
 
-        {/* INPUT */}
-        {isBlocked ? (
-          <View style={styles.blockedContainer}>
-            <Text style={styles.blockedText}>
-              This user is currently blocked
-            </Text>
-            <TouchableOpacity onPress={() => setShowUnblockModal(true)}>
-              <Text style={styles.unblockText}>
-                Would you like to unblock them ?
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <ChatInput />
-        )}
-
-        {/* MODAL BLOCK USER */}
-        <BlockModal
-          visible={showBlockModal}
-          onClose={() => setShowBlockModal(false)}
-          onConfirm={() => {
-            // TODO: xử lý block user
-            setShowBlockModal(false);
-            setIsBlocked(true);
-          }}
-        />
-
-        <UnblockBlockModal
-          visible={showUnblockModal}
-          onClose={() => setShowUnblockModal(false)}
-          onConfirm={() => {
-            setShowUnblockModal(false);
-            setIsBlocked(false); // 👈 unblocked thành công
-          }}
-        />
+        <ChatInput />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -88,28 +71,9 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: 'white',
   },
   container: {
     flex: 1,
-  },
-  blockedContainer: {
-    backgroundColor: 'white',
-    paddingVertical: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderTopWidth: 0.5,
-    borderColor: '#ccc',
-  },
-  blockedText: {
-    fontWeight: '600',
-    fontSize: 14,
-    color: 'black',
-  },
-  unblockText: {
-    marginTop: 4,
-    color: 'blue',
-    fontWeight: '700',
-    textDecorationLine: 'underline',
   },
 });

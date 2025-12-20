@@ -13,6 +13,7 @@ export default function TabLayout() {
           backgroundColor: 'white',
           borderTopColor: '#e5e5e5',
           height: 60,
+          paddingBottom: 100,
         },
         tabBarActiveTintColor: 'black',
         tabBarInactiveTintColor: 'black',
@@ -50,6 +51,21 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="noti"
+        options={{
+          title: 'Notifications',
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons
+              name={focused ? 'notifications' : 'notifications-outline'}
+              size={size}
+              color={'black'}
+            />
+          ),
+        }}
+      />
+
       <Tabs.Screen
         name="chat"
         options={{
@@ -63,6 +79,7 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="setting"
         options={{
