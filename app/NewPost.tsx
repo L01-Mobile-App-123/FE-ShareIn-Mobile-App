@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -14,51 +14,95 @@ import {
 } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import type { CreatePostDto } from '../services/postService';
+import { PostService } from '../services/postService';
 
 type TradeType = 'give' | 'swap' | 'sell';
 
 export default function NewPost() {
   const router = useRouter();
+  const { editId } = useLocalSearchParams<{ editId?: string }>();
 
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [categoryValue, setCategoryValue] = useState<string | null>(null);
-  const [categoryItems, setCategoryItems] = useState([
-    { label: 'Electronics', value: 'Electronics' },
-    { label: 'Clothes', value: 'Clothes' },
-    { label: 'Books', value: 'Books' },
-    { label: 'Furniture', value: 'Furniture' },
-  ]);
 
-  const [locationOpen, setLocationOpen] = useState(false);
-  const [locationValue, setLocationValue] = useState<string | null>(null);
-  const [locationItems, setLocationItems] = useState([
-    { label: 'Hanoi', value: 'Hanoi' },
-    { label: 'Ho Chi Minh', value: 'Ho Chi Minh' },
-    { label: 'Da Nang', value: 'Da Nang' },
-    { label: 'Can Tho', value: 'Can Tho' },
-    { label: 'Hue', value: 'Hue' },
-    { label: 'Hai Phong', value: 'Hai Phong' },
-    { label: 'Nha Trang', value: 'Nha Trang' },
-    { label: 'Vung Tau', value: 'Vung Tau' },
-    { label: 'Quy Nhon', value: 'Quy Nhon' },
-    { label: 'Buon Ma Thuot', value: 'Buon Ma Thuot' },
-    { label: 'Pleiku', value: 'Pleiku' },
-    { label: 'Long Xuyen', value: 'Long Xuyen' },
-    { label: 'Rach Gia', value: 'Rach Gia' },
-    { label: 'Soc Trang', value: 'Soc Trang' },
-    { label: 'Bac Lieu', value: 'Bac Lieu' },
-    { label: 'Ca Mau', value: 'Ca Mau' },
-    { label: 'Tra Vinh', value: 'Tra Vinh' },
-    { label: 'Ben Tre', value: 'Ben Tre' },
-    { label: 'Tien Giang', value: 'Tien Giang' },
-    { label: 'Dong Thap', value: 'Dong Thap' },
-  ]);
+  const [location, setLocation] = useState('');
+
+  const [categoryItems, setCategoryItems] = useState<
+    { label: string; value: string }[]
+  >([]);
+
+  // case lấy old post
+  const [remoteImages, setRemoteImages] = useState<string[]>([]);
+
+  useEffect(() => {
+    PostService.getCategories().then((data) => {
+      const items = data.map((c) => ({
+        label: c.category_name,
+        value: c.category_id,
+      }));
+      setCategoryItems(items);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!editId) return;
+
+    (async () => {
+      try {
+        const res = await PostService.getPost(editId);
+        const post = (res as any).data ?? res;
+
+        setCategoryValue(post.category.category_id);
+        setLocation(post.location);
+        setTradeType(
+          post.transaction_type === 'BAN_RE'
+            ? 'sell'
+            : post.transaction_type === 'DOI_DO'
+              ? 'swap'
+              : 'give',
+        );
+        setContent(post.description);
+
+        if (post.transaction_type === 'BAN_RE' && post.price) {
+          const min = Math.round(post.price * 0.8);
+          const max = Math.round(post.price * 1.2);
+          setAmountFrom(String(min));
+          setAmountTo(String(max));
+        } else {
+          setAmountFrom('');
+          setAmountTo('');
+        }
+
+        setRemoteImages(post.image_urls ?? []);
+      } catch (e) {
+        console.log(e);
+      }
+    })();
+  }, [editId]);
 
   const [tradeType, setTradeType] = useState<TradeType>('give');
-  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [selectedImages, setSelectedImages] = useState<
+    ImagePicker.ImagePickerAsset[]
+  >([]);
+
   const [content, setContent] = useState('');
   const [amountFrom, setAmountFrom] = useState('');
   const [amountTo, setAmountTo] = useState('');
+
+  const mapTradeType = (t: TradeType): 'CHO_MIEN_PHI' | 'BAN_RE' | 'DOI_DO' => {
+    if (t === 'give') return 'CHO_MIEN_PHI';
+    if (t === 'swap') return 'DOI_DO';
+    return 'BAN_RE';
+  };
+
+  const calcPrice = (t: TradeType, from: string, to: string) => {
+    if (t !== 'sell') return 0;
+    const min = Number(from) || 0;
+    const max = Number(to) || 0;
+    if (!min && !max) return 0;
+    return Math.round((min + max) / 2);
+  };
 
   const handleOpenGallery = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -74,13 +118,12 @@ export default function NewPost() {
     });
 
     if (!result.canceled) {
-      const newUris = result.assets.map((a) => a.uri);
-      setSelectedImages((prev) => [...prev, ...newUris]);
+      setSelectedImages((prev) => [...prev, ...result.assets]);
     }
   };
 
   const removeImage = (uri: string) => {
-    setSelectedImages((prev) => prev.filter((i) => i !== uri));
+    setSelectedImages((prev) => prev.filter((i) => i.uri !== uri));
   };
 
   const handleSave = () => {
@@ -88,13 +131,30 @@ export default function NewPost() {
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Save',
-        onPress: () => {
-          Alert.alert('Success', 'Post saved successfully.', [
-            {
-              text: 'OK',
-              onPress: () => router.back(),
-            },
-          ]);
+        onPress: async () => {
+          if (!categoryValue || !location) {
+            Alert.alert('Error', 'Category and location are required');
+            return;
+          }
+
+          const payload: CreatePostDto = {
+            category_id: categoryValue,
+            title: 'Default title for drafting. Does not matter',
+            description: content,
+            location,
+            transaction_type: mapTradeType(tradeType),
+            price: calcPrice(tradeType, amountFrom, amountTo),
+            status: 'draft',
+          };
+
+          const post = await PostService.createPost(payload);
+
+          // up ảnh chỉ local
+          if (selectedImages.length > 0) {
+            await PostService.uploadImages(post.post_id, selectedImages);
+          }
+
+          router.back();
         },
       },
     ]);
@@ -105,13 +165,30 @@ export default function NewPost() {
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Post',
-        onPress: () => {
-          Alert.alert('Success', 'Post published successfully.', [
-            {
-              text: 'OK',
-              onPress: () => router.back(),
-            },
-          ]);
+        onPress: async () => {
+          if (!categoryValue || !location) {
+            Alert.alert('Error', 'Category and location are required');
+            return;
+          }
+
+          const payload: CreatePostDto = {
+            category_id: categoryValue,
+            title: 'Default title for posting. Does not matter',
+            description: content,
+            location,
+            transaction_type: mapTradeType(tradeType),
+            price: calcPrice(tradeType, amountFrom, amountTo),
+            status: 'posted',
+          };
+
+          const post = await PostService.createPost(payload);
+
+          // up ảnh chỉ local
+          if (selectedImages.length > 0) {
+            await PostService.uploadImages(post.post_id, selectedImages);
+          }
+
+          router.back();
         },
       },
     ]);
@@ -169,18 +246,11 @@ export default function NewPost() {
         />
 
         <Text style={styles.label}>Location *</Text>
-        <DropDownPicker
-          open={locationOpen}
-          value={locationValue}
-          items={locationItems}
-          setOpen={setLocationOpen}
-          setValue={setLocationValue}
-          setItems={setLocationItems}
-          placeholder="---"
-          style={styles.selectBox}
-          dropDownContainerStyle={styles.dropdownContainer}
-          zIndex={2000}
-          zIndexInverse={2000}
+        <TextInput
+          placeholder="Enter location"
+          value={location}
+          onChangeText={setLocation}
+          style={[styles.selectBox, { paddingHorizontal: 12, height: 44 }]}
         />
 
         <View style={styles.tradeRow}>
@@ -238,27 +308,37 @@ export default function NewPost() {
         )}
 
         <FlatList
-          key={tradeType === 'sell' ? 'row' : 'grid'}
-          data={selectedImages}
-          keyExtractor={(i) => i}
-          horizontal={tradeType === 'sell'}
-          numColumns={tradeType === 'sell' ? 1 : 4}
-          showsHorizontalScrollIndicator={tradeType === 'sell'}
+          key="grid"
+          data={[
+            ...remoteImages.map((uri) => ({ type: 'remote' as const, uri })),
+            ...selectedImages.map((a) => ({
+              type: 'local' as const,
+              uri: a.uri,
+            })),
+          ]}
+          keyExtractor={(i) => i.uri}
+          numColumns={4}
           renderItem={({ item }) => (
             <View style={styles.previewWrapper}>
-              <Image source={{ uri: item }} style={styles.previewImage} />
+              <Image source={{ uri: item.uri }} style={styles.previewImage} />
               <Pressable
                 style={styles.removeBtn}
-                onPress={() => removeImage(item)}
+                onPress={() => {
+                  if (item.type === 'remote') {
+                    setRemoteImages((prev) =>
+                      prev.filter((u) => u !== item.uri),
+                    );
+                  } else {
+                    setSelectedImages((prev) =>
+                      prev.filter((i) => i.uri !== item.uri),
+                    );
+                  }
+                }}
               >
                 <Ionicons name="close-circle" size={18} color="red" />
               </Pressable>
             </View>
           )}
-          style={{
-            marginTop: 12,
-            marginBottom: tradeType === 'sell' ? 16 : 0,
-          }}
         />
 
         <View style={styles.bottom}>
@@ -331,10 +411,12 @@ const styles = StyleSheet.create({
 
   previewWrapper: {
     position: 'relative',
-    marginRight: 20,
     marginTop: 12,
     marginBottom: 12,
+    width: '25%',
+    alignItems: 'center',
   },
+
   previewImage: { width: 75, height: 75, borderRadius: 10 },
   removeBtn: { position: 'absolute', top: -6, right: -6 },
 

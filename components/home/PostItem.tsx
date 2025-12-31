@@ -2,9 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { PostService } from './../../services/postService';
 
 // 1. Định nghĩa Interface cho dữ liệu
 export interface Post {
+  post_id: string;
   user_id: string;
   authorName: string;
   avatarUrl: string;
@@ -15,39 +17,59 @@ export interface Post {
   content: string;
   images: string[];
   likesCount: number;
+  price?: number;
 }
 
 interface PostItemProps {
   item: Post;
+  saved?: boolean;
   onLike?: (user_id: string) => void;
   onSave?: (user_id: string) => void;
   onChat?: (user_id: string) => void;
+  editable?: boolean;
 }
 
 export default function PostItem({
   item,
+  saved: savedProp,
   onLike,
   onSave,
   onChat,
+  editable,
 }: PostItemProps) {
-  // 1. Thêm state cho nút like và save
   const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(savedProp ?? false);
+
   const router = useRouter();
 
-  // 2. Sửa handleLikePress
-  const handleLikePress = () => {
-    setLiked(!liked);
-    onLike?.(item.user_id); // gọi API nếu cần
+  const handleLikePress = async () => {
+    try {
+      if (!liked) {
+        await PostService.like(item.post_id);
+        setLiked(true);
+      } else {
+        await PostService.unlike(item.post_id);
+        setLiked(false);
+      }
+    } catch (e) {
+      console.log(e);
+    }
   };
 
-  // 3. Sửa handleSavePress
-  const handleSavePress = () => {
-    setSaved(!saved);
-    onSave?.(item.user_id); // gọi API nếu cần
+  const handleSavePress = async () => {
+    try {
+      if (!saved) {
+        await PostService.save(item.post_id);
+        setSaved(true);
+      } else {
+        await PostService.unsave(item.post_id);
+        setSaved(false);
+      }
+    } catch (e) {
+      console.log(e);
+    }
   };
 
-  // 4. Sửa handleChatPress
   const handleChatPress = () => {
     onChat?.(item.user_id);
     router.push({
@@ -60,43 +82,60 @@ export default function PostItem({
     });
   };
 
+  const formatMoney = (n: number) =>
+    n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+  const getMinMaxFromPrice = (price: number) => {
+    const delta = price * 0.2;
+    const min = Math.round(price - delta);
+    const max = Math.round(price + delta);
+    return { min, max };
+  };
+
+  const minMax =
+    item.tag === 'BAN_RE' && item.price ? getMinMaxFromPrice(item.price) : null;
+
   return (
     <View style={styles.card}>
-      {/* Header: Avatar, Name, Time, Location và Stars */}
       <View style={styles.header}>
         <Image source={{ uri: item.avatarUrl }} style={styles.avatar} />
 
         <View style={styles.headerInfo}>
-          <View style={styles.nameRow}>
+          <View style={styles.leftInfo}>
             <Text style={styles.name}>{item.authorName}</Text>
-            <Text style={styles.metaText}>
-              {item.timestamp} • {item.location}
-            </Text>
+            <View style={styles.ratingRow}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Ionicons
+                  key={star}
+                  name={star <= item.rating ? 'star' : 'star-outline'}
+                  size={20}
+                  color="black"
+                />
+              ))}
+            </View>
           </View>
 
-          {/* Phần Rating Stars */}
-          <View style={styles.ratingRow}>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Ionicons
-                key={star}
-                name={star <= item.rating ? 'star' : 'star-outline'}
-                size={20}
-                color="black"
-              />
-            ))}
+          <View style={styles.rightInfo}>
+            <Text style={styles.metaText}>{item.timestamp}</Text>
+            <Text style={styles.metaText}>{item.location}</Text>
           </View>
         </View>
       </View>
 
-      {/* Tag: Give away */}
-      <View style={styles.tagContainer}>
-        <Text style={styles.tagText}>{item.tag}</Text>
+      <View style={styles.tagRow}>
+        <View style={styles.tagContainer}>
+          <Text style={styles.tagText}>{item.tag}</Text>
+        </View>
+
+        {item.tag === 'BAN_RE' && minMax && (
+          <Text style={styles.priceRangeText}>
+            {formatMoney(minMax.min)} - {formatMoney(minMax.max)}
+          </Text>
+        )}
       </View>
 
-      {/* Content */}
       <Text style={styles.contentText}>{item.content}</Text>
 
-      {/* Image Grid thay thế cho MasonryList */}
       <View style={styles.imageGrid}>
         {item.images.length > 0 && (
           <View style={styles.imageContainer}>
@@ -114,30 +153,50 @@ export default function PostItem({
         )}
       </View>
 
-      {/* Footer: Like, Chat, Save */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.footerBtn} onPress={handleLikePress}>
-          <Ionicons
-            name={liked ? 'heart' : 'heart-outline'}
-            size={24}
-            color={liked ? 'red' : 'black'}
-          />
-          <Text>{liked ? item.likesCount + 1 : item.likesCount}</Text>
-        </TouchableOpacity>
+      <View style={[styles.footer, editable && styles.footerEditable]}>
+        {editable ? (
+          <TouchableOpacity
+            style={styles.footerBtn}
+            onPress={() => router.push(`/NewPost?editId=${item.post_id}`)}
+          >
+            <Ionicons name="create-outline" size={22} color="black" />
+            <Text style={styles.footerBtnText}>Edit</Text>
+          </TouchableOpacity>
+        ) : (
+          <>
+            <TouchableOpacity
+              style={styles.footerBtn}
+              onPress={handleLikePress}
+            >
+              <Ionicons
+                name={liked ? 'heart' : 'heart-outline'}
+                size={24}
+                color={liked ? 'red' : 'black'}
+              />
+              <Text>{liked ? item.likesCount + 1 : item.likesCount}</Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity style={styles.footerBtn} onPress={handleChatPress}>
-          <Ionicons name="chatbubble-outline" size={22} color="black" />
-          <Text style={styles.footerBtnText}>Chat</Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.footerBtn}
+              onPress={handleChatPress}
+            >
+              <Ionicons name="chatbubble-outline" size={22} color="black" />
+              <Text style={styles.footerBtnText}>Chat</Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity style={styles.footerBtn} onPress={handleSavePress}>
-          <Ionicons
-            name={saved ? 'bookmark' : 'bookmark-outline'}
-            size={22}
-            color={saved ? 'blue' : 'black'}
-          />
-          <Text>{saved ? 'Saved' : 'Save'}</Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.footerBtn}
+              onPress={handleSavePress}
+            >
+              <Ionicons
+                name={saved ? 'bookmark' : 'bookmark-outline'}
+                size={22}
+                color={saved ? 'blue' : 'black'}
+              />
+              <Text>{saved ? 'Saved' : 'Save'}</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
     </View>
   );
@@ -163,11 +222,9 @@ const styles = StyleSheet.create({
   headerInfo: {
     flex: 1,
     marginLeft: 12,
-  },
-  nameRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   name: {
     fontSize: 18,
@@ -184,7 +241,7 @@ const styles = StyleSheet.create({
   },
   tagContainer: {
     marginTop: 12,
-    backgroundColor: '#FFDD57', // Màu vàng giống hình
+    backgroundColor: '#FFDD57',
     alignSelf: 'flex-start',
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -208,45 +265,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: 8, // Khoảng cách giữa các ảnh
+    gap: 8,
   },
   imageItem: {
-    height: 200, // Bạn có thể tùy chỉnh chiều cao cố định hoặc dùng aspect ratio
+    height: 200,
     borderRadius: 8,
     backgroundColor: '#eee',
     marginBottom: 8,
-  },
-  leftColumn: {
-    flex: 1,
-    gap: 10,
-  },
-  rightColumn: {
-    flex: 1,
-  },
-  smallImageBox: {
-    flex: 1,
-    backgroundColor: '#FFA500',
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  largeImageBox: {
-    flex: 1,
-    backgroundColor: '#FFA500',
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-  },
-  placeholderText: {
-    color: 'white',
-    fontWeight: '500',
   },
   footer: {
     flexDirection: 'row',
@@ -265,5 +290,22 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#444',
     fontWeight: '500',
+  },
+  leftInfo: { flex: 1 },
+  rightInfo: { alignItems: 'flex-end' },
+
+  tagRow: {
+    marginTop: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  priceRangeText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  footerEditable: {
+    justifyContent: 'flex-end',
   },
 });
