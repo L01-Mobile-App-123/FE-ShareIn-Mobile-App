@@ -1,29 +1,25 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { Image, StyleSheet, TextInput, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
-interface HomeHeaderProps {
-  onChangeText: (text: string) => void;
-  value: string;
-}
+interface HomeHeaderProps {}
 
-export default function HomeHeader({ onChangeText, value }: HomeHeaderProps) {
+export default function HomeHeader() {
+  const router = useRouter();
+
   return (
     <View style={styles.header}>
       <Image
         source={{ uri: 'https://i.pravatar.cc/100?img=8' }}
         style={styles.avatar}
       />
-      <View style={styles.inputContainer}>
-        <Ionicons name="create-outline" size={20} color="#fff" />
-        <TextInput
-          placeholder="What do you want to do today?"
-          placeholderTextColor="#fff"
-          style={styles.input}
-          value={value}
-          onChangeText={onChangeText}
-        />
-      </View>
+      <Pressable style={{ flex: 1 }} onPress={() => router.push('/NewPost')}>
+        <View style={styles.inputContainer}>
+          <Ionicons name="create-outline" size={20} color="#fff" />
+          <Text style={styles.input}>What do you want to do today?</Text>
+        </View>
+      </Pressable>
     </View>
   );
 }

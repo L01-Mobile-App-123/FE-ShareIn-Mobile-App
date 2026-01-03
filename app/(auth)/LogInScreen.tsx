@@ -26,8 +26,8 @@ export default function LogInScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
-    router.replace('/(tabs)');
-    return;
+    // router.replace('/(tabs)');
+    // return;
 
     if (!email || !password) {
       Alert.alert('Error', 'Please enter email and password');

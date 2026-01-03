@@ -1,82 +1,122 @@
-import React from 'react';
-import { FlatList, View } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, FlatList, Text, View } from 'react-native';
+import { PostService } from './../../services/postService';
 import PostItem, { Post } from './PostItem';
 
-export const mockPosts: Post[] = [
-  {
-    user_id: 'f7ff90bf-2ba7-4a53-bfb7-f745bc5def2d',
-    authorName: 'Gia Nguyên',
-    avatarUrl: 'https://i.pravatar.cc/150?img=1',
-    timestamp: '13 hrs ago',
-    location: 'HCM City',
-    tag: 'Give away',
-    rating: 4,
-    content:
-      'Mình có cái nồi cơm điện Sharp 1.8L, mua tầm 2 năm rồi, vẫn dùng tốt, cơm chín đều, chỉ có vỏ ngoài hơi trầy chút. Giờ mình đổi sang nồi mới nên cái này dư ra, bạn nào cần thì mình để lại, ai ở gần thì tiện ghé lấy nha.hh',
-    images: [
-      'https://picsum.photos/200/300',
-      'https://picsum.photos/300/300',
-      'https://picsum.photos/400/300',
-    ],
-    likesCount: 12,
-  },
-  {
-    user_id: '33c447ad-2b23-4b43-b74a-af87f58a38af',
-    authorName: 'Gia Nguyên',
-    avatarUrl: 'https://i.pravatar.cc/150?img=2',
-    timestamp: '2 days ago',
-    location: 'HCM City',
-    tag: 'Give away',
-    rating: 5,
-    content: 'Còn một chiếc ghế cũ ai cần thì qua lấy nhé!',
-    images: [
-      'https://picsum.photos/id/1011/300/400',
-      'https://picsum.photos/id/1012/300/300',
-      'https://picsum.photos/id/1013/400/300',
-      'https://picsum.photos/id/1015/500/400',
-      'https://picsum.photos/id/1016/350/350',
-      'https://picsum.photos/id/1020/300/450',
-      'https://picsum.photos/id/1024/400/400',
-      'https://picsum.photos/id/1025/300/300',
-      'https://picsum.photos/id/1027/450/300',
-      'https://picsum.photos/id/1031/400/500',
-      'https://picsum.photos/id/1033/350/400',
-      'https://picsum.photos/id/1035/300/300',
-      'https://picsum.photos/id/1037/400/350',
-      'https://picsum.photos/id/1040/500/300',
-      'https://picsum.photos/id/1043/400/400',
-    ],
-    likesCount: 5,
-  },
-  {
-    user_id: '49060eb4-9641-4fd3-af07-f7884e2aee5a',
-    authorName: 'Gia Nguyên',
-    avatarUrl: 'https://picsum.photos/seed/user29/200/200',
-    timestamp: '2 days ago',
-    location: 'HCM City',
-    tag: 'Give away',
-    rating: 3,
-    content: 'Còn một chiếc ghế cũ ai cần thì qua lấy nhé!',
-    images: [
-      'https://via.placeholder.com/150',
-      'https://via.placeholder.com/150',
-      'https://via.placeholder.com/300',
-    ],
-    likesCount: 2,
-  },
-];
-
 export default function PostList() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+
+  const pageRef = useRef(1);
+  const loadingRef = useRef(false);
+
+  useEffect(() => {
+    fetchPosts();
+    fetchSaved();
+  }, []);
+
+  const fetchSaved = async () => {
+    try {
+      const data = await PostService.getSaved({ page: 1, limit: 100 });
+      const ids = new Set(data.map((i: any) => i.post?.post_id || i.post_id));
+      setSavedIds(ids);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const fetchPosts = async () => {
+    if (loadingRef.current || !hasMore) return;
+
+    loadingRef.current = true;
+    const currentPage = pageRef.current;
+
+    try {
+      const data = await PostService.getPosts({ page: currentPage, limit: 20 });
+
+      if (data.length === 0) {
+        setHasMore(false);
+        return;
+      }
+
+      const onlyPosted = data.filter((i: any) => i.status === 'posted');
+
+      const mapped: Post[] = onlyPosted.map((item: any) => ({
+        post_id: item.post_id,
+        user_id: item.user.user_id,
+        authorName: item.user.full_name,
+        avatarUrl: item.user.avatar_url,
+        timestamp: new Date(item.created_at).toLocaleDateString(),
+        location: item.location,
+        tag: item.transaction_type,
+        rating: item.user.reputation_score ?? 0,
+        content: item.description,
+        images: item.image_urls,
+        likesCount: item.view_count,
+        price: item.price,
+        status: item.status,
+      }));
+
+      setPosts((prev) => {
+        const map = new Map<string, Post>();
+
+        for (const p of prev) map.set(p.post_id, p);
+        for (const p of mapped) map.set(p.post_id, p);
+
+        return Array.from(map.values());
+      });
+
+      pageRef.current += 1;
+    } catch (err) {
+      console.log(err);
+    } finally {
+      loadingRef.current = false;
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setPosts([]);
+      setHasMore(true);
+      pageRef.current = 1;
+      fetchPosts();
+    }, []),
+  );
+
   return (
     <View style={{ paddingHorizontal: 16 }}>
       <FlatList
-        data={mockPosts}
-        keyExtractor={(item) => item.user_id}
-        renderItem={({ item }) => <PostItem item={item} />}
+        data={posts}
+        keyExtractor={(item) => item.post_id}
+        renderItem={({ item }) => (
+          <PostItem item={item} saved={savedIds.has(item.post_id)} />
+        )}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: 40, // tránh trùng với tab bar nếu cần
-        }}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        onEndReached={fetchPosts}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          <>
+            {loadingRef.current ? (
+              <ActivityIndicator style={{ marginVertical: 16 }} />
+            ) : null}
+
+            {!hasMore && !loadingRef.current ? (
+              <Text
+                style={{
+                  textAlign: 'center',
+                  color: '#888',
+                  marginVertical: 12,
+                  fontSize: 12,
+                }}
+              >
+                There is nothing more to show
+              </Text>
+            ) : null}
+          </>
+        }
       />
     </View>
   );
