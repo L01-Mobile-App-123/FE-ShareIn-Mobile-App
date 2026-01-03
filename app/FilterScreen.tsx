@@ -11,59 +11,59 @@ import { router, useLocalSearchParams } from 'expo-router';
 import RNPickerSelect from 'react-native-picker-select';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import { PostService } from '@/services/postService';
+import { CategoryDropdown } from '@/components/interest/AddInterestCard';
 
 dayjs.extend(customParseFormat);
 
 export default function FilterScreen({ navigation }: any) {
-  const [category, setCategory] = useState('Give away');
-  const [type, setType] = useState('');
-
-  const [time, setTime] = useState<string | null>('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-
-  const categories = ['Exchange', 'Give away', 'Sell'];
-  const times = ['1 week ago', '1 month ago', '1 year ago'];
-
-  const itemTypes = [
-    { label: 'Chair', value: 'chair' },
-    { label: 'Table', value: 'table' },
-    { label: 'Laptop', value: 'laptop' },
-    { label: 'Phone', value: 'phone' },
-    { label: 'Clothes', value: 'clothes' },
-    { label: 'Books', value: 'books' },
-    { label: 'Bicycle', value: 'bicycle' },
-    { label: 'Others', value: 'others' },
-  ];
+  const [selectedType, setSelectedType] = useState('');
+  const [timeRange, setTimeRange] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [sortBy, setSortBy] = useState('');
+  const [category, setCategory] = useState('');
+  const [categoryItems, setCategoryItems] = useState<{ label: string; value: string }[]>([]);
 
   const params = useLocalSearchParams();
 
-  useEffect(() => {
-    if (!time) return;
-    const now = dayjs();
-    let start;
-    switch (time) {
-      case '1 week ago':
-        start = now.subtract(1, 'week');
-        break;
-      case '1 month ago':
-        start = now.subtract(1, 'month');
-        break;
-      case '1 year ago':
-        start = now.subtract(1, 'year');
-        break;
-      default:
-        start = now;
-    }
-    setStartDate(start.format('DD/MM/YYYY'));
-    setEndDate(now.format('DD/MM/YYYY'));
-  }, [time]);
+  const type = [
+    { label: 'Sell', value: 'sell' },
+    { label: 'Free', value: 'free' },
+    { label: 'Exchange', value: 'exchange' },
+  ];
 
-  const handleCustomDateChange = (type: 'start' | 'end', value: string) => {
-    if (type === 'start') setStartDate(value);
-    if (type === 'end') setEndDate(value);
-    setTime(null); // reset preset selection
-  };
+  const times = [
+    {
+      label: '7 Days',
+      value: '7d',
+    },
+    {
+      label: '30 Days',
+      value: '30d',
+    },
+    {
+      label: 'All Time',
+      value: 'all',
+    },
+  ];
+
+  const sortOptions = [
+    { label: 'Price: Low to High', value: 'price_asc' },
+    { label: 'Price: High to Low', value: 'price_desc' },
+    { label: 'Newest First', value: 'newest' },
+    { label: 'Oldest First', value: 'oldest' },
+  ];
+
+  useEffect(() => {
+    PostService.getCategories().then((data) => {
+      const items = data.map((c) => ({
+        label: c.category_name,
+        value: c.category_id,
+      }));
+      setCategoryItems(items);
+    });
+  }, []);
 
   useEffect(() => {
     if (params.filters) {
@@ -71,33 +71,16 @@ export default function FilterScreen({ navigation }: any) {
         const parsed = JSON.parse(params.filters as string);
 
         setCategory(parsed.category ?? '');
-        setType(parsed.selectedType ?? '');
-        setStartDate(parsed.startDate ?? '');
-        setEndDate(parsed.endDate ?? '');
+        setSelectedType(parsed.selectedType ?? '');
+        setTimeRange(parsed.timeRange ?? '');
+        setMinPrice(parsed.minPrice ?? '');
+        setMaxPrice(parsed.maxPrice ?? '');
+        setSortBy(parsed.sortBy ?? '');
       } catch (e) {
         console.warn('Error parsing filters:', e);
       }
     }
   }, [params.filters]);
-
-  useEffect(() => {
-    if (!startDate || !endDate) return;
-
-    const start = dayjs(startDate, 'DD/MM/YYYY');
-    const end = dayjs(endDate, 'DD/MM/YYYY');
-
-    if (!start.isValid() || !end.isValid()) {
-      console.warn('Invalid date(s):', startDate, endDate);
-      return;
-    }
-
-    const diffDays = end.diff(start, 'day');
-
-    if (diffDays === 7) setTime('1 week ago');
-    else if (diffDays === 30 || diffDays === 31) setTime('1 month ago');
-    else if (diffDays >= 364 && diffDays <= 366) setTime('1 year ago');
-    else setTime(null); // custom range, không khớp preset
-  }, [startDate, endDate]);
 
   return (
     <View style={styles.container}>
@@ -111,32 +94,77 @@ export default function FilterScreen({ navigation }: any) {
 
       {/* Category */}
       <View style={styles.section}>
+        {/* type */}
+        <Text style={styles.label}>Type</Text>
         <View style={styles.row}>
-          {categories.map((c) => (
+          {type.map((t) => (
             <TouchableOpacity
-              key={c}
-              onPress={() => setCategory(c)}
-              style={[styles.chip, category === c && styles.chipActive]}
+              key={t.label}
+              onPress={() => setSelectedType(t.value)}
+              style={[styles.chip, selectedType === t.value && styles.chipActive]}
             >
               <Text
-                style={[
-                  styles.chipText,
-                  category === c && styles.chipTextActive,
-                ]}
+                style={[styles.chipText, selectedType === t.value && styles.chipTextActive]}
               >
-                {c}
+                {t.label}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* Type */}
-        <Text style={styles.label}>Type</Text>
+        {/* Category */}
+        <Text style={styles.label}>Category</Text>
+        <View style={styles.row}>
+          <CategoryDropdown
+            categoryId={category}
+            setCategoryId={setCategory}
+          />
+        </View>
+
+        {/* Time */}
+        <Text style={styles.label}>Time</Text>
+        <View style={styles.row}>
+          {times.map((t) => (
+            <TouchableOpacity
+              key={t.label}
+              onPress={() => setTimeRange(t.value)}
+              style={[styles.chip, timeRange === t.value && styles.chipActive]}
+            >
+              <Text
+                style={[styles.chipText, timeRange === t.value && styles.chipTextActive]}
+              >
+                {t.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Price Range */}
+        <Text style={styles.label}>Price Range</Text>
+        <View style={styles.row}>
+          <TextInput
+            style={styles.dateInput}
+            placeholder="Min Price"
+            keyboardType="numeric"
+            value={minPrice}
+            onChangeText={setMinPrice}
+          />
+          <TextInput
+            style={styles.dateInput}
+            placeholder="Max Price"
+            keyboardType="numeric"
+            value={maxPrice}
+            onChangeText={setMaxPrice}
+          />
+        </View>
+
+        {/* Sort By */}
+        <Text style={styles.label}>Sort By</Text>
         <View style={styles.dropdown}>
           <RNPickerSelect
-            items={itemTypes}
-            onValueChange={setType}
-            value={type}
+            items={sortOptions}
+            onValueChange={setSortBy}
+            value={sortBy}
             style={{
               inputIOS: { ...styles.dropdownText, borderWidth: 0 },
               inputAndroid: {
@@ -160,48 +188,8 @@ export default function FilterScreen({ navigation }: any) {
             }}
             useNativeAndroidPickerStyle={false}
             Icon={() => <Ionicons name="chevron-down" size={24} color="#ddd" />}
-            placeholder={{ label: 'Select item type', value: null }}
+            placeholder={{ label: 'Select sort option', value: null }}
           />
-        </View>
-
-        {/* Time */}
-        <Text style={styles.label}>Time</Text>
-        <View style={styles.row}>
-          {times.map((t) => (
-            <TouchableOpacity
-              key={t}
-              onPress={() => setTime(t)}
-              style={[styles.chip, time === t && styles.chipActive]}
-            >
-              <Text
-                style={[styles.chipText, time === t && styles.chipTextActive]}
-              >
-                {t}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Dates */}
-        <View style={styles.dateRow}>
-          <View style={styles.dateBox}>
-            <Text style={styles.label}>Start:</Text>
-            <TextInput
-              value={startDate}
-              onChangeText={(text) => handleCustomDateChange('start', text)}
-              style={styles.dateInput}
-              placeholder="DD/MM/YYYY"
-            />
-          </View>
-          <View style={styles.dateBox}>
-            <Text style={styles.label}>End:</Text>
-            <TextInput
-              value={endDate}
-              onChangeText={(text) => handleCustomDateChange('end', text)}
-              style={styles.dateInput}
-              placeholder="DD/MM/YYYY"
-            />
-          </View>
         </View>
       </View>
 
@@ -214,9 +202,11 @@ export default function FilterScreen({ navigation }: any) {
             params: {
               filters: JSON.stringify({
                 category,
-                type,
-                startDate,
-                endDate,
+                selectedType,
+                timeRange,
+                minPrice,
+                maxPrice,
+                sortBy
               }),
             },
           });

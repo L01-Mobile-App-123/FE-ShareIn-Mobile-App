@@ -1,4 +1,4 @@
-import ApiClient from "@/config/api";
+import ApiClient, { cleanPayload } from "@/config/api";
 
 export interface SearchParams {
   keyword?: string;
@@ -24,7 +24,7 @@ export const SearchService = {
   async search<T = any>(
     params: SearchParams,
   ): Promise<SearchResponse<T>> {
-    const res = await ApiClient.get('/api/v1/search', {
+    const res = await ApiClient.get('/api/v1/search', cleanPayload({
       keyword: params.keyword,
       transaction_type: params.transactionType,
       category_id: params.categoryId,
@@ -34,7 +34,9 @@ export const SearchService = {
       max_price: params.maxPrice,
       page: params.page,
       limit: params.limit,
-    });
+    }));
+
+    console.log('SearchService.search response:', res.data);
 
     return res.data;
   },

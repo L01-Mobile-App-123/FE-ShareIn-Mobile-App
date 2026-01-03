@@ -10,81 +10,46 @@ type CategoryUI = {
 
 export const CATEGORY_UI_MAP: Record<string, CategoryUI> = {
   // Sách & Tài liệu học tập
-  '06490d65-ca73-435d-854a-baad9c4cfc1d': {
+  'd1052a21-5b27-4f97-bff5-72449df1c7e5': {
     colors: ['#FFD84D', '#FFB703'],
     icon: 'book-outline',
     label: 'Sách & Tài liệu',
   },
 
   // Đồ dùng học tập / Văn phòng phẩm
-  'db88df79-22c9-4424-9b70-4d46a32ee275': {
+  '57b7553e-e9f8-417d-933a-1eeb9faed6ef': {
     colors: ['#A0E7E5', '#4ECDC4'],
     icon: 'pencil-outline',
-    label: 'Văn phòng phẩm',
+    label: 'Đồ dùng học tập/Văn phòng phẩm',
   },
 
   // Thiết bị Điện tử
-  '8e948542-70c9-41eb-adf5-e5b05687583c': {
+  '1652de72-58da-4117-af6e-4702028cdd67': {
     colors: ['#4158D0', '#C850C0'],
     icon: 'laptop-outline',
     label: 'Điện tử',
   },
 
   // Đồ Gia dụng & Thiết bị khác xí
-  '5f0f76fd-ee82-42c0-b812-327de73acf61': {
+  '4448261e-5985-4eb6-a0a5-20c5964ade77': {
     colors: ['#FF9A8B', '#FF6A88'],
     icon: 'home-outline',
-    label: 'Gia dụng & Khác',
+    label: 'Gia dụng & Ký túc xá',
   },
 
   // Quần áo & Phụ kiện
-  'cf2c9eef-50d4-4653-aa29-901f2c131609': {
+  '65c8f363-dd99-4118-b85c-8dc1b51be67d': {
     colors: ['#74E272', '#4CAF50'],
     icon: 'shirt-outline',
     label: 'Quần áo & Phụ kiện',
   },
 
   // Dịch vụ & Khác
-  'ba9d9e6c-50ad-4930-8c69-7beff715b147': {
+  'c4ae4f0c-fa95-4a08-810f-7577c8552c03': {
     colors: ['#B7B7FF', '#8B8BFF'],
     icon: 'briefcase-outline',
     label: 'Dịch vụ & Khác',
-  },
-
-  // Electronics (dự phòng tiếng Anh)
-  '11111111-1111-1111-1111-111111111111': {
-    colors: ['#4158D0', '#C850C0'],
-    icon: 'laptop-outline',
-    label: 'Electronics',
-  },
-
-  // Books (dự phòng tiếng Anh)
-  '22222222-2222-2222-2222-222222222222': {
-    colors: ['#FFD84D', '#FFB703'],
-    icon: 'book-outline',
-    label: 'Books',
-  },
-
-  // Furniture (dự phòng tiếng Anh)
-  '33333333-3333-3333-3333-333333333333': {
-    colors: ['#FF9A8B', '#FF6A88'],
-    icon: 'bed-outline',
-    label: 'Furniture',
-  },
-
-  // Clothing (dự phòng tiếng Anh)
-  '44444444-4444-4444-4444-444444444444': {
-    colors: ['#74E272', '#4CAF50'],
-    icon: 'shirt-outline',
-    label: 'Clothing',
-  },
-
-  // Misc (dự phòng tiếng Anh)
-  '55555555-5555-5555-5555-555555555555': {
-    colors: ['#B7B7FF', '#8B8BFF'],
-    icon: 'apps-outline',
-    label: 'Misc',
-  },
+  }
 };
 
 type CategoryOption = {

@@ -137,7 +137,7 @@ export default function PostItem({
       <Text style={styles.contentText}>{item.content}</Text>
 
       <View style={styles.imageGrid}>
-        {item.images.length > 0 && (
+        {item.images?.length > 0 ? (
           <View style={styles.imageContainer}>
             {item.images.map((uri, index) => (
               <Image
@@ -150,7 +150,7 @@ export default function PostItem({
               />
             ))}
           </View>
-        )}
+        ) : null}
       </View>
 
       <View style={[styles.footer, editable && styles.footerEditable]}>

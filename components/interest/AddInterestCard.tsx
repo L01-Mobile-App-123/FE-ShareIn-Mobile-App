@@ -22,7 +22,6 @@ export default function AddInterestCard({
 }) {
   const [keyword, setKeyword] = useState('');
   const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleAddInterest = async () => {
@@ -44,20 +43,6 @@ export default function AddInterestCard({
     }
   };
 
-  const SelectedCategory = ({ id }: { id: string }) => {
-    const ui = CATEGORY_UI_MAP[id];
-
-    return (
-      <View style={styles.selectedRow}>
-        <LinearGradient colors={ui.colors} style={styles.iconBox}>
-          <Ionicons name={ui.icon as any} size={16} color="white" />
-        </LinearGradient>
-
-        <Text style={styles.selectedText}>{ui.label}</Text>
-      </View>
-    );
-  };
-
   return (
     <View
       style={[
@@ -70,20 +55,11 @@ export default function AddInterestCard({
       <Text style={styles.subtitle}>Do you want to add it to Interest?</Text>
 
       {/* Category input */}
-      <View style={styles.field}>
-        <Text style={styles.label}>
-          Category <Text style={styles.required}>*</Text>
-        </Text>
-
-        <Pressable style={styles.dropdown} onPress={() => setOpen(true)}>
-          {categoryId ? (
-            <SelectedCategory id={categoryId} />
-          ) : (
-            <Text style={styles.placeholder}>Select category</Text>
-          )}
-        </Pressable>
-      </View>
-
+      <CategoryDropdown
+        categoryId={categoryId}
+        setCategoryId={setCategoryId}
+      />
+      
       {/* Keyword input */}
       <View style={styles.field}>
         <Text style={styles.label}>
@@ -109,7 +85,48 @@ export default function AddInterestCard({
           <Text style={styles.buttonText}>Add Interest</Text>
         )}
       </TouchableOpacity>
+    </View>
+  );
+}
 
+export function CategoryDropdown({
+  categoryId,
+  setCategoryId,
+}: {
+  categoryId: string | null;
+  setCategoryId: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  const SelectedCategory = ({ id }: { id: string }) => {
+    const ui = CATEGORY_UI_MAP[id];
+
+    return (
+      <View style={styles.selectedRow}>
+        <LinearGradient colors={ui.colors} style={styles.iconBox}>
+          <Ionicons name={ui.icon as any} size={16} color="white" />
+        </LinearGradient>
+
+        <Text style={styles.selectedText}>{ui.label}</Text>
+      </View>
+    );
+  };
+  
+  return (
+    <>
+      <View style={styles.field}>
+        <Text style={styles.label}>
+          Category <Text style={styles.required}>*</Text>
+        </Text>
+
+        <Pressable style={styles.dropdown} onPress={() => setOpen(true)}>
+          {categoryId ? (
+            <SelectedCategory id={categoryId} />
+          ) : (
+            <Text style={styles.placeholder}>Select category</Text>
+          )}
+        </Pressable>
+      </View>
       <Modal visible={open} transparent animationType="fade">
         <Pressable style={styles.overlay} onPress={() => setOpen(false)}>
           <View style={styles.sheet}>
@@ -135,7 +152,7 @@ export default function AddInterestCard({
           </View>
         </Pressable>
       </Modal>
-    </View>
+    </>
   );
 }
 
