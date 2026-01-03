@@ -14,18 +14,18 @@ export default function PostList() {
 
   useEffect(() => {
     fetchPosts();
-    fetchSaved();
+    // fetchSaved();
   }, []);
 
-  const fetchSaved = async () => {
-    try {
-      const data = await PostService.getSaved({ page: 1, limit: 100 });
-      const ids = new Set(data.map((i: any) => i.post?.post_id || i.post_id));
-      setSavedIds(ids);
-    } catch (e) {
-      console.log(e);
-    }
-  };
+  // const fetchSaved = async () => {
+  //   try {
+  //     const data = await PostService.getSaved({ page: 1, limit: 100 });
+  //     const ids = new Set(data.map((i: any) => i.post?.post_id || i.post_id));
+  //     setSavedIds(ids);
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // };
 
   const fetchPosts = async () => {
     if (loadingRef.current || !hasMore) return;
@@ -42,6 +42,9 @@ export default function PostList() {
       }
 
       const onlyPosted = data.filter((i: any) => i.status === 'posted');
+      const onlyAvaible = onlyPosted.filter(
+        (i: any) => i.is_available === true,
+      );
 
       const mapped: Post[] = onlyPosted.map((item: any) => ({
         post_id: item.post_id,
@@ -51,12 +54,15 @@ export default function PostList() {
         timestamp: new Date(item.created_at).toLocaleDateString(),
         location: item.location,
         tag: item.transaction_type,
-        rating: item.user.reputation_score ?? 0,
+        rating: Math.floor(((item.user?.reputation_score ?? 0) / 100) * 5),
         content: item.description,
         images: item.image_urls,
         likesCount: item.view_count,
         price: item.price,
         status: item.status,
+        is_available: item.is_available,
+        is_liked: item.is_liked,
+        is_saved: item.is_saved,
       }));
 
       setPosts((prev) => {
@@ -90,9 +96,7 @@ export default function PostList() {
       <FlatList
         data={posts}
         keyExtractor={(item) => item.post_id}
-        renderItem={({ item }) => (
-          <PostItem item={item} saved={savedIds.has(item.post_id)} />
-        )}
+        renderItem={({ item }) => <PostItem item={item} />}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
         onEndReached={fetchPosts}

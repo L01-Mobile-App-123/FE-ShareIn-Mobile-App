@@ -1,5 +1,4 @@
 import PostItem, { Post } from '@/components/home/PostItem';
-import PostList from '@/components/home/PostList';
 import AddInterestCard from '@/components/interest/AddInterestCard';
 import { SearchService } from '@/services/searchService';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,7 +6,6 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  FlatList,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -82,6 +80,25 @@ export default function SearchScreen() {
     }
   }, [params.filters]);
 
+  const mapToPost = (item: any): Post => ({
+    post_id: item.post_id,
+    user_id: item.user_id,
+    authorName: item.user?.full_name,
+    avatarUrl: item.user?.avatar_url,
+    timestamp: new Date(item.created_at).toLocaleDateString(),
+    location: item.location,
+    tag: item.transaction_type,
+    rating: Math.floor(((item.user?.reputation_score ?? 0) / 100) * 5),
+    content: item.description,
+    images: item.image_urls,
+    likesCount: item.view_count,
+    price: item.price,
+    status: item.status,
+    is_available: item.is_available,
+    is_liked: item.is_liked,
+    is_saved: item.is_saved,
+  });
+
   return (
     <ScrollView
       style={styles.container}
@@ -124,14 +141,33 @@ export default function SearchScreen() {
           </View>
           <TouchableOpacity
             onPress={async () => {
-              const data = await SearchService.search({ keyword: query, transactionType: selectedType, categoryId: category, timeRange, sortBy, minPrice: minPrice ? Number(minPrice) : undefined, maxPrice: maxPrice ? Number(maxPrice) : undefined, page: 1, limit: 20 });
-              setPostList(data.items);
+              const data = await SearchService.search({
+                keyword: query,
+                transactionType: selectedType,
+                categoryId: category,
+                timeRange,
+                sortBy,
+                minPrice: minPrice ? Number(minPrice) : undefined,
+                maxPrice: maxPrice ? Number(maxPrice) : undefined,
+                page: 1,
+                limit: 20,
+              });
+
+              const mapped = data.items.map(mapToPost);
+
+              setPostList(mapped);
               setSuggestions([]);
               setHistory([]);
-              setShowAddnewInterest(data.items.length === 0);
-              setHasMore(data.items.length >= 20);
+              setShowAddnewInterest(mapped.length === 0);
+              setHasMore(mapped.length >= 20);
+              pageRef.current = 1;
             }}
-            style={{ marginLeft: 10, backgroundColor: '#eee', padding: 10, borderRadius: 10 }}
+            style={{
+              marginLeft: 10,
+              backgroundColor: '#eee',
+              padding: 10,
+              borderRadius: 10,
+            }}
           >
             <Ionicons name="search" size={24} color="#333" />
           </TouchableOpacity>
@@ -146,17 +182,22 @@ export default function SearchScreen() {
                     timeRange,
                     minPrice,
                     maxPrice,
-                    sortBy
+                    sortBy,
                   }),
                 },
               });
             }}
-            style={{ marginLeft: 10, backgroundColor: '#eee', padding: 10, borderRadius: 10 }}
+            style={{
+              marginLeft: 10,
+              backgroundColor: '#eee',
+              padding: 10,
+              borderRadius: 10,
+            }}
           >
             <Ionicons name="filter" size={24} color="#333" />
           </TouchableOpacity>
         </View>
-        
+
         {/* Pop up suggestions */}
         {suggestions.length > 0 && (
           <View style={{ padding: 20 }}>
@@ -164,7 +205,7 @@ export default function SearchScreen() {
               <TouchableOpacity
                 key={index}
                 onPress={() => {
-                  setQuery(item); 
+                  setQuery(item);
                   handleSearch(item);
                 }}
                 style={{ paddingVertical: 6 }}
@@ -175,7 +216,7 @@ export default function SearchScreen() {
           </View>
         )}
 
-        {history.length > 0 &&  (
+        {history.length > 0 && (
           <View style={{ padding: 20 }}>
             <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 10 }}>
               Recent Searches
@@ -221,8 +262,19 @@ export default function SearchScreen() {
             <TouchableOpacity
               onPress={async () => {
                 loadingRef.current = true;
-                const data = await SearchService.search({ keyword: query, transactionType: selectedType, categoryId: category, timeRange, sortBy, minPrice: minPrice ? Number(minPrice) : undefined, maxPrice: maxPrice ? Number(maxPrice) : undefined, page: pageRef.current + 1, limit: 20 });
-                setPostList((prev) => [...prev, ...data.items]);
+                const data = await SearchService.search({
+                  keyword: query,
+                  transactionType: selectedType,
+                  categoryId: category,
+                  timeRange,
+                  sortBy,
+                  minPrice: minPrice ? Number(minPrice) : undefined,
+                  maxPrice: maxPrice ? Number(maxPrice) : undefined,
+                  page: pageRef.current + 1,
+                  limit: 20,
+                });
+                setPostList((prev) => [...prev, ...data.items.map(mapToPost)]);
+
                 setHasMore(data.items.length >= 20);
                 loadingRef.current = false;
                 pageRef.current += 1;
@@ -237,8 +289,19 @@ export default function SearchScreen() {
             <TouchableOpacity
               onPress={async () => {
                 loadingRef.current = true;
-                const data = await SearchService.search({ keyword: query, transactionType: selectedType, categoryId: category, timeRange, sortBy, minPrice: minPrice ? Number(minPrice) : undefined, maxPrice: maxPrice ? Number(maxPrice) : undefined, page: pageRef.current - 1, limit: 20 });
-                setPostList((prev) => [...prev, ...data.items]);
+                const data = await SearchService.search({
+                  keyword: query,
+                  transactionType: selectedType,
+                  categoryId: category,
+                  timeRange,
+                  sortBy,
+                  minPrice: minPrice ? Number(minPrice) : undefined,
+                  maxPrice: maxPrice ? Number(maxPrice) : undefined,
+                  page: pageRef.current - 1,
+                  limit: 20,
+                });
+                setPostList((prev) => [...prev, ...data.items.map(mapToPost)]);
+
                 setHasMore(data.items.length >= 20);
                 loadingRef.current = false;
                 pageRef.current -= 1;
@@ -249,7 +312,6 @@ export default function SearchScreen() {
             </TouchableOpacity>
           ) : null}
         </>
-
 
         {showAddnewInterest && <AddInterestCard />}
       </View>

@@ -18,27 +18,27 @@ export interface Post {
   images: string[];
   likesCount: number;
   price?: number;
+  status: boolean;
+  is_available: boolean;
+  is_liked: boolean;
+  is_saved: boolean;
 }
 
 interface PostItemProps {
   item: Post;
   saved?: boolean;
-  onLike?: (user_id: string) => void;
-  onSave?: (user_id: string) => void;
   onChat?: (user_id: string) => void;
   editable?: boolean;
 }
 
-export default function PostItem({
-  item,
-  saved: savedProp,
-  onLike,
-  onSave,
-  onChat,
-  editable,
-}: PostItemProps) {
-  const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(savedProp ?? false);
+export default function PostItem({ item, onChat, editable }: PostItemProps) {
+  const [liked, setLiked] = useState(item.is_liked === true);
+  const [saved, setSaved] = useState(item.is_saved === true);
+
+  React.useEffect(() => {
+    setLiked(item.is_liked === true);
+    setSaved(item.is_saved === true);
+  }, [item.is_liked, item.is_saved]);
 
   const router = useRouter();
 
