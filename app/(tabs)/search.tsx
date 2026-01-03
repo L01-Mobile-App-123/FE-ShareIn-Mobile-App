@@ -1,9 +1,13 @@
+import { Post } from '@/components/home/PostItem';
 import PostList from '@/components/home/PostList';
 import AddInterestCard from '@/components/interest/AddInterestCard';
+import { SearchService } from '@/services/searchService';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
+  RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -11,23 +15,47 @@ import {
   View,
 } from 'react-native';
 
-export default function SearchScreen({ navigation }: any) {
+export default function SearchScreen() {
   const [query, setQuery] = useState('');
-  const [postListVisible, setPostListVisible] = useState(true);
+  const [history, setHistory] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [postList, setPostList] = useState<Post[]>([]);
+  const [showAddnewInterest, setShowAddnewInterest] = useState(false);
+
   const [selectedType, setSelectedType] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [timeRange, setTimeRange] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [sortBy, setSortBy] = useState('');
   const [category, setCategory] = useState('');
 
   const params = useLocalSearchParams();
 
-  const handleSearch = (text: string) => {
-    if (text.trim().toLowerCase() === 'table') {
-      setPostListVisible(false);
-    } else {
-      setPostListVisible(true);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchHistory = async () => {
+    const history = await SearchService.getSearchHistory();
+    setHistory(history);
+  };
+
+  const onRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await fetchHistory();
+    } finally {
+      setRefreshing(false);
     }
   };
+
+  const handleSearch = async (text: string) => {
+    const suggestions = await SearchService.getSuggestions(text);
+    setSuggestions(suggestions);
+  };
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
 
   useEffect(() => {
     if (params.filters) {
@@ -36,8 +64,10 @@ export default function SearchScreen({ navigation }: any) {
 
         setCategory(parsed.category ?? '');
         setSelectedType(parsed.type ?? '');
-        setStartDate(parsed.startDate ?? '');
-        setEndDate(parsed.endDate ?? '');
+        setMinPrice(parsed.minPrice ?? '');
+        setMaxPrice(parsed.maxPrice ?? '');
+        setSortBy(parsed.sortBy ?? '');
+        setTimeRange(parsed.timeRange ?? '');
       } catch (e) {
         console.warn('Error parsing filters:', e);
       }
@@ -45,60 +75,125 @@ export default function SearchScreen({ navigation }: any) {
   }, [params.filters]);
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}> Search</Text>
-      </View>
-
-      {/* Search input */}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          width: '100%',
-          paddingHorizontal: 20,
-          justifyContent: 'space-between',
-        }}
-      >
-        <View style={styles.content}>
-          <Text style={styles.label}>Search query</Text>
-          <TextInput
-            value={query}
-            onChangeText={(text) => {
-              setQuery(text);
-              handleSearch(text);
-            }}
-            placeholder="Enter keyword..."
-            style={styles.input}
-          />
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={['#FF9A00']} // Android
+          tintColor="#FF9A00" // iOS
+        />
+      }
+    >
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}> Search</Text>
         </View>
-        <TouchableOpacity
-          onPress={() => {
-            router.push({
-              pathname: '/FilterScreen',
-              params: {
-                filters: JSON.stringify({
-                  category,
-                  selectedType,
-                  startDate,
-                  endDate,
-                }),
-              },
-            });
+
+        {/* Search input */}
+        <Text style={styles.label}>Search query</Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            width: '100%',
+            paddingHorizontal: 20,
+            justifyContent: 'space-between',
           }}
         >
-          <Ionicons name="filter" size={24} color="#333" />
-        </TouchableOpacity>
-      </View>
+          <View style={styles.content}>
+            <TextInput
+              value={query}
+              onChangeText={(text) => {
+                setQuery(text);
+                handleSearch(text);
+              }}
+              placeholder="Enter keyword..."
+              style={styles.input}
+            />
+          </View>
+          <TouchableOpacity
+            onPress={async () => {
+              const data = await SearchService.search({ keyword: query, transactionType: selectedType, categoryId: category });
+              setPostList(data.items);
+              setSuggestions([]);
+              setHistory([]);
+              setShowAddnewInterest(data.items.length === 0);
+            }}
+            style={{ marginLeft: 10, backgroundColor: '#eee', padding: 10, borderRadius: 10 }}
+          >
+            <Ionicons name="search" size={24} color="#333" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              // router.push({
+              //   pathname: '/FilterScreen',
+              //   params: {
+              //     filters: JSON.stringify({
+              //       category,
+              //       selectedType,
+              //       startDate,
+              //       endDate,
+              //     }),
+              //   },
+              // });
+            }}
+            style={{ marginLeft: 10, backgroundColor: '#eee', padding: 10, borderRadius: 10 }}
+          >
+            <Ionicons name="filter" size={24} color="#333" />
+          </TouchableOpacity>
+        </View>
+        
+        {/* Pop up suggestions */}
+        {suggestions.length > 0 && (
+          <View style={{ padding: 20 }}>
+            {suggestions.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => {
+                  setQuery(item); 
+                  handleSearch(item);
+                }}
+                style={{ paddingVertical: 6 }}
+              >
+                <Text style={{ fontSize: 14, color: '#555' }}>{item}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
-      {postListVisible ? <PostList /> : <AddInterestCard isFullWidth={false} />}
-    </View>
+        {history.length > 0 &&  (
+          <View style={{ padding: 20 }}>
+            <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 10 }}>
+              Recent Searches
+            </Text>
+            {history.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => {
+                  setQuery(item);
+                  handleSearch(item);
+                }}
+                style={{ paddingVertical: 6 }}
+              >
+                <Text style={{ fontSize: 14, color: '#555' }}>{item}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        {postList.length > 0 && <PostList items={postList} />}
+
+        {showAddnewInterest && <AddInterestCard />}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { backgroundColor: '#fff' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -116,13 +211,12 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     marginRight: 10,
-    marginTop: 10,
-    marginBottom: 20,
   },
   label: {
     color: '#666',
     fontSize: 14,
     marginBottom: 6,
+    paddingHorizontal: 20,
   },
   input: {
     borderWidth: 1,
