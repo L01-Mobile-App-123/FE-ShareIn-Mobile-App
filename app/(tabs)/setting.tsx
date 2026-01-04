@@ -101,7 +101,14 @@ export default function SettingScreen() {
                 router.push(item.route as never);
               }}
             >
-              <Text style={[styles.menuText, {color: item.title === 'Sign out' ? '#FF3B30' : '#333'}]}>{item.title}</Text>
+              <Text
+                style={[
+                  styles.menuText,
+                  { color: item.title === 'Sign out' ? '#FF3B30' : '#333' },
+                ]}
+              >
+                {item.title}
+              </Text>
               <Ionicons name="chevron-forward" size={20} color="#999" />
             </TouchableOpacity>
           ))}

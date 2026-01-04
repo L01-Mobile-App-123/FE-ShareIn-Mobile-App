@@ -18,7 +18,9 @@ import {
 export default function SearchScreen() {
   const [query, setQuery] = useState('');
   const [history, setHistory] = useState<string[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [postList, setPostList] = useState<Post[]>([]);
   const [showAddnewInterest, setShowAddnewInterest] = useState(false);
 
@@ -38,8 +40,10 @@ export default function SearchScreen() {
   const pageRef = useRef(1);
 
   const fetchHistory = async () => {
+    setLoadingHistory(true);
     const history = await SearchService.getSearchHistory();
     setHistory(history);
+    setLoadingHistory(false);
   };
 
   const onRefresh = async () => {
@@ -64,8 +68,10 @@ export default function SearchScreen() {
   };
 
   const handleSearch = async (text: string) => {
+    setLoadingSuggestions(true);
     const suggestions = await SearchService.getSuggestions(text);
     setSuggestions(suggestions);
+    setLoadingSuggestions(false);
   };
 
   useEffect(() => {
@@ -149,7 +155,7 @@ export default function SearchScreen() {
             />
           </View>
           <TouchableOpacity
-            onPress={async () => { 
+            onPress={async () => {
               const data = await SearchService.search({
                 keyword: query,
                 transactionType: selectedType,
@@ -209,7 +215,7 @@ export default function SearchScreen() {
         </View>
 
         {/* Pop up suggestions */}
-        {suggestions.length > 0 && (
+        {suggestions.length > 0 ? (
           <View style={{ padding: 20 }}>
             <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 10 }}>
               Suggestions
@@ -227,9 +233,15 @@ export default function SearchScreen() {
               </TouchableOpacity>
             ))}
           </View>
-        )}
+        ) : loadingSuggestions ? (
+          <ActivityIndicator
+            size="large"
+            color={'#FFCC00'}
+            style={{ marginVertical: 16 }}
+          />
+        ) : null}
 
-        {history.length > 0 && (
+        {history.length > 0 ? (
           <View style={{ padding: 20 }}>
             <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 10 }}>
               Recent Searches
@@ -247,7 +259,13 @@ export default function SearchScreen() {
               </TouchableOpacity>
             ))}
           </View>
-        )}
+        ) : loadingHistory ? (
+          <ActivityIndicator
+            size="large"
+            color={'#FFCC00'}
+            style={{ marginVertical: 16 }}
+          />
+        ) : null}
 
         {postList.map((item) => (
           <PostItem key={item.post_id} item={item} />
@@ -255,7 +273,11 @@ export default function SearchScreen() {
 
         <View>
           {loadingRef.current ? (
-            <ActivityIndicator size="large" color={'#fff'} style={{ marginVertical: 16 }}/>
+            <ActivityIndicator
+              size="large"
+              color={'#FFCC00'}
+              style={{ marginVertical: 16 }}
+            />
           ) : null}
 
           {hasMore && postList.length > 0 ? (

@@ -12,10 +12,11 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import DropDownPicker from 'react-native-dropdown-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { CreatePostDto } from '../services/postService';
 import { PostService } from '../services/postService';
+import { CategoryDropdown } from '@/components/interest/AddInterestCard';
+import analytics from '@react-native-firebase/analytics';
 
 type TradeType = 'give' | 'swap' | 'sell';
 
@@ -149,6 +150,8 @@ export default function NewPost() {
 
           const post = await PostService.createPost(payload);
 
+          analytics().logEvent('post_draft_create', { post_id: post.post_id });
+
           // up ảnh chỉ local
           if (selectedImages.length > 0) {
             await PostService.uploadImages(post.post_id, selectedImages);
@@ -182,6 +185,8 @@ export default function NewPost() {
           };
 
           const post = await PostService.createPost(payload);
+
+          analytics().logEvent('post_create', { post_id: post.post_id });
 
           // up ảnh chỉ local
           if (selectedImages.length > 0) {
@@ -228,8 +233,8 @@ export default function NewPost() {
           />
         </View>
 
-        <Text style={styles.label}>Category *</Text>
-        <DropDownPicker
+        <Text style={[styles.label, { marginBottom: 8 }]}>Category *</Text>
+        {/* <DropDownPicker
           open={categoryOpen}
           value={categoryValue}
           items={categoryItems}
@@ -243,6 +248,11 @@ export default function NewPost() {
           zIndexInverse={1000}
           maxHeight={220}
           listMode="FLATLIST"
+        /> */}
+        <CategoryDropdown
+          categoryId={categoryValue}
+          setCategoryId={setCategoryValue}
+          isShowLabel={false}
         />
 
         <Text style={styles.label}>Location *</Text>
@@ -268,11 +278,7 @@ export default function NewPost() {
                   tradeType === t ? styles.tradeTextActive : styles.tradeText
                 }
               >
-                {t === 'give'
-                  ? 'Free'
-                  : t === 'swap'
-                    ? 'Exchange'
-                    : 'Sell'}
+                {t === 'give' ? 'Free' : t === 'swap' ? 'Exchange' : 'Sell'}
               </Text>
             </Pressable>
           ))}
@@ -362,9 +368,9 @@ export default function NewPost() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#fff' },
-  container: { flex: 1, paddingHorizontal: 20 },
+  container: { flex: 1, paddingHorizontal: 20, paddingTop: 10 },
 
-  header: { fontSize: 20, fontWeight: '600', marginTop: 8 },
+  header: { fontSize: 20, fontWeight: '600', marginTop: 10 },
 
   inputBox: {
     backgroundColor: '#FFF6E5',

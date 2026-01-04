@@ -2,7 +2,7 @@ import { NotificationItem, NotificationService } from '@/services/notiService';
 import { Ionicons } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 import { router, useFocusEffect, useRouter } from 'expo-router';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -12,6 +12,41 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import analytics from '@react-native-firebase/analytics';
+
+type ListItem =
+  | { type: 'header'; title: string }
+  | { type: 'item'; data: NotificationItem };
+
+function groupNotificationsByDate(
+  notifications: NotificationItem[],
+): ListItem[] {
+  const grouped: Record<string, NotificationItem[]> = {};
+
+  notifications.forEach((noti) => {
+    const dateKey = dayjs(noti.created_at).format('YYYY-MM-DD');
+    if (!grouped[dateKey]) grouped[dateKey] = [];
+    grouped[dateKey].push(noti);
+  });
+
+  return Object.keys(grouped)
+    .sort((a, b) => dayjs(b).unix() - dayjs(a).unix()) // mới trước
+    .flatMap((dateKey) => {
+      const title = dayjs(dateKey).isSame(dayjs(), 'day')
+        ? 'Today'
+        : dayjs(dateKey).isSame(dayjs().subtract(1, 'day'), 'day')
+          ? 'Yesterday'
+          : dayjs(dateKey).format('DD/MM/YYYY');
+
+      return [
+        { type: 'header', title },
+        ...grouped[dateKey].map((noti) => ({
+          type: 'item',
+          data: noti,
+        })),
+      ];
+    });
+}
 
 interface Props {
   item: NotificationItem;
@@ -33,6 +68,10 @@ const NotificationCard = ({ item, onRead, onDelete }: Props) => {
         if (item.post_id) {
           router.push(`/PostDetail?postId=${item.post_id}`);
         }
+
+        analytics().logEvent('open_noti', {
+          notification_id: item.notification_id,
+        });
       }}
       style={({ pressed }) => ({
         opacity: pressed ? 0.6 : 1,
@@ -40,9 +79,10 @@ const NotificationCard = ({ item, onRead, onDelete }: Props) => {
     >
       <View
         style={{
+          marginVertical: 4,
           paddingVertical: 14,
-          paddingHorizontal: 16,
-          backgroundColor: isUnread ? '#FFFBEB' : '#FFFFFF',
+          paddingHorizontal: 8,
+          backgroundColor: isUnread ? '#FFFBEB' : '#fcfcfcff',
           borderBottomWidth: 1,
           borderBottomColor: '#EAEAEA',
           flexDirection: 'row',
@@ -86,10 +126,6 @@ const NotificationCard = ({ item, onRead, onDelete }: Props) => {
             numberOfLines={3}
           >
             {item.content}
-          </Text>
-
-          <Text style={{ fontSize: 11, color: '#9CA3AF', marginTop: 6 }}>
-            {dayjs(item.created_at).format('DD/MM/YYYY HH:mm')}
           </Text>
         </View>
 
@@ -150,6 +186,11 @@ export default function NotiScreen() {
     }
   };
 
+  const groupedData = useMemo(
+    () => groupNotificationsByDate(notifications),
+    [notifications],
+  );
+
   useFocusEffect(
     useCallback(() => {
       setNotifications([]);
@@ -171,30 +212,54 @@ export default function NotiScreen() {
           </View>
         </View>
 
-        <FlatList 
-          data={notifications}
-          keyExtractor={(item) => item.notification_id}
-          renderItem={({ item }) => <NotificationCard item={item} onRead={() => {
-            item.is_read = true;
-            setNotifications([...notifications]);
-          }} onDelete={() => {
-            setNotifications(notifications.filter(noti => noti.notification_id !== item.notification_id));
-          }} />}
+        <FlatList
+          data={groupedData}
+          keyExtractor={(item, index) =>
+            item.type === 'header'
+              ? `header-${item.title}`
+              : item.data.notification_id
+          }
+          renderItem={({ item }) => {
+            if (item.type === 'header') {
+              return <Text style={styles.dateHeader}>{item.title}</Text>;
+            }
+
+            return (
+              <NotificationCard
+                item={item.data}
+                onRead={() => {
+                  item.data.is_read = true;
+                  setNotifications([...notifications]);
+                }}
+                onDelete={() => {
+                  setNotifications(
+                    notifications.filter(
+                      (n) => n.notification_id !== item.data.notification_id,
+                    ),
+                  );
+                }}
+              />
+            );
+          }}
           onEndReached={fetchNotifications}
           onEndReachedThreshold={0.5}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 40 }}
           ListFooterComponent={
             <View>
-              {loadingRef.current ? (
-                <ActivityIndicator size="large" color={'#fff'} style={{ marginVertical: 16 }}/>
-              ) : null}
+              {loadingRef.current && (
+                <ActivityIndicator
+                  size="large"
+                  color="#fff"
+                  style={{ marginVertical: 16 }}
+                />
+              )}
 
-              {!hasMore && !loadingRef.current ? (
+              {!hasMore && !loadingRef.current && (
                 <Text style={styles.emptyText}>
                   There is nothing more to show
                 </Text>
-              ) : null}
+              )}
             </View>
           }
         />
@@ -231,5 +296,12 @@ const styles = StyleSheet.create({
     color: '#888',
     marginVertical: 12,
     fontSize: 12,
+  },
+  dateHeader: {
+    marginTop: 8,
+    paddingHorizontal: 16,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6B7280',
   },
 });

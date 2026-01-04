@@ -1,4 +1,4 @@
-import ApiClient, { cleanPayload } from "@/config/api";
+import ApiClient, { cleanPayload } from '@/config/api';
 
 export interface GetNotificationParams {
   page?: number;
@@ -6,21 +6,19 @@ export interface GetNotificationParams {
 }
 
 export interface NotificationItem {
-    notification_id: string;
-    title: string;
-    content: string;
-    notification_type: 'NEW_POST_IN_INTEREST' | 'POST_SOLD' | 'GENERAL';
-    post_id?: string;
-    category_id?: string;
-    is_read: boolean;
-    created_at: string;
+  notification_id: string;
+  title: string;
+  content: string;
+  notification_type: 'NEW_POST_IN_INTEREST' | 'POST_SOLD' | 'GENERAL';
+  post_id?: string;
+  category_id?: string;
+  is_read: boolean;
+  created_at: string;
 }
 
 export const NotificationService = {
   /** Lấy danh sách thông báo */
-  async getList<T = any>(
-    params: GetNotificationParams,
-  ): Promise<T> {
+  async getList<T = any>(params: GetNotificationParams): Promise<T> {
     const res = await ApiClient.get(
       '/api/v1/notification',
       cleanPayload({
@@ -58,12 +56,9 @@ export const NotificationService = {
 
   /** Đánh dấu đã đọc tất cả */
   async markAllAsRead(isRead: boolean = true): Promise<any> {
-    const res = await ApiClient.patch(
-      '/api/v1/notification/read-all',
-      {
-        is_read: isRead,
-      },
-    );
+    const res = await ApiClient.patch('/api/v1/notification/read-all', {
+      is_read: isRead,
+    });
 
     return res.data;
   },

@@ -1,4 +1,5 @@
 import ApiClient from '../config/api';
+import analytics from '@react-native-firebase/analytics';
 
 export type Category = {
   category_id: string;
@@ -119,10 +120,12 @@ export const UserInterestService = {
     keyWord: string,
   ): Promise<InterestItem[]> {
     const currentInterestsRes = await ApiClient.get('/api/v1/user-interests');
-    console.log('Current Interests:', currentInterestsRes.data);
     const payload = addKeyword(currentInterestsRes.data, categoryId, keyWord);
-    console.log('Payload:', payload);
     const res = await ApiClient.put('/api/v1/user-interests', payload);
+    analytics().logEvent('add_user_interest', {
+      category_id: categoryId,
+      keyword: keyWord,
+    });
     return mapUserInterests(res.data);
   },
 

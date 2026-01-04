@@ -1,5 +1,6 @@
 import ApiClient, { cleanPayload, toISODate } from '../config/api';
 import * as ImagePicker from 'expo-image-picker';
+import analytics from '@react-native-firebase/analytics';
 
 export type UserProfile = {
   user_id: string;
@@ -25,6 +26,7 @@ export function getDefaultAvatar(name?: string) {
 
 export const UserService = {
   async login(): Promise<void> {
+    analytics().logLogin({ method: 'firebase' });
     return await ApiClient.post('/api/v1/auth/verify');
   },
 

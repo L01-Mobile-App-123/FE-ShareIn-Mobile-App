@@ -1,4 +1,5 @@
-import ApiClient, { cleanPayload } from "@/config/api";
+import ApiClient, { cleanPayload } from '@/config/api';
+import analytics from '@react-native-firebase/analytics';
 
 export interface SearchParams {
   keyword?: string;
@@ -21,20 +22,22 @@ export interface SearchResponse<T> {
 }
 
 export const SearchService = {
-  async search<T = any>(
-    params: SearchParams,
-  ): Promise<SearchResponse<T>> {
-    const res = await ApiClient.get('/api/v1/search', cleanPayload({
-      keyword: params.keyword,
-      transactionType: params.transactionType,
-      categoryId: params.categoryId,
-      timeRange: params.timeRange,
-      sortBy: params.sortBy,
-      minPrice: params.minPrice,
-      maxPrice: params.maxPrice,
-      page: params.page,
-      limit: params.limit,
-    }));
+  async search<T = any>(params: SearchParams): Promise<SearchResponse<T>> {
+    analytics().logSearch({ search_term: params.keyword || '' });
+    const res = await ApiClient.get(
+      '/api/v1/search',
+      cleanPayload({
+        keyword: params.keyword,
+        transactionType: params.transactionType,
+        categoryId: params.categoryId,
+        timeRange: params.timeRange,
+        sortBy: params.sortBy,
+        minPrice: params.minPrice,
+        maxPrice: params.maxPrice,
+        page: params.page,
+        limit: params.limit,
+      }),
+    );
 
     return res.data;
   },

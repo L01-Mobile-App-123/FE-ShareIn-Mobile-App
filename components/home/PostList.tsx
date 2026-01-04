@@ -104,7 +104,11 @@ export default function PostList() {
         ListFooterComponent={
           <View>
             {loadingRef.current ? (
-              <ActivityIndicator size="large" color={'#fff'} style={{ marginVertical: 16 }}/>
+              <ActivityIndicator
+                size="large"
+                color={'#fff'}
+                style={{ marginVertical: 16 }}
+              />
             ) : null}
 
             {!hasMore && !loadingRef.current ? (

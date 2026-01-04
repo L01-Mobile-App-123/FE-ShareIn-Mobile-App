@@ -102,7 +102,11 @@ export default function OldPost() {
           ListFooterComponent={
             <View>
               {loadingRef.current ? (
-                <ActivityIndicator size="large" color={'#FFCC00'} style={{ marginVertical: 16 }}/>
+                <ActivityIndicator
+                  size="large"
+                  color={'#FFCC00'}
+                  style={{ marginVertical: 16 }}
+                />
               ) : null}
 
               {!hasMore && !loadingRef.current ? (

@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { PostService } from './../../services/postService';
+import analytics from '@react-native-firebase/analytics';
 
 // 1. Định nghĩa Interface cho dữ liệu
 export interface Post {
@@ -46,6 +47,7 @@ export default function PostItem({ item, onChat, editable }: PostItemProps) {
     try {
       if (!liked) {
         await PostService.like(item.post_id);
+        analytics().logEvent('like_post', { post_id: item.post_id });
         setLiked(true);
       } else {
         await PostService.unlike(item.post_id);
@@ -60,6 +62,7 @@ export default function PostItem({ item, onChat, editable }: PostItemProps) {
     try {
       if (!saved) {
         await PostService.save(item.post_id);
+        analytics().logEvent('save_post', { post_id: item.post_id });
         setSaved(true);
       } else {
         await PostService.unsave(item.post_id);
@@ -72,6 +75,7 @@ export default function PostItem({ item, onChat, editable }: PostItemProps) {
 
   const handleChatPress = () => {
     onChat?.(item.user_id);
+    analytics().logEvent('initiate_chat', { user_id: item.user_id });
     router.push({
       pathname: '/ChatScreen',
       params: {
@@ -89,10 +93,10 @@ export default function PostItem({ item, onChat, editable }: PostItemProps) {
       case 'CHO_MIEN_PHI':
         return 'Free';
       case 'DOI_DO':
-        return 'Exchange';  
+        return 'Exchange';
       default:
         return item.tag;
-    } 
+    }
   };
 
   const formatMoney = (n: number) =>
@@ -109,11 +113,14 @@ export default function PostItem({ item, onChat, editable }: PostItemProps) {
     item.tag === 'BAN_RE' && item.price ? getMinMaxFromPrice(item.price) : null;
 
   return (
-    <TouchableOpacity style={styles.card} onPress={() => {
-      if (!editable) {
-        router.push(`/PostDetail?postId=${item.post_id}`);
-      }
-    }}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => {
+        if (!editable) {
+          router.push(`/PostDetail?postId=${item.post_id}`);
+        }
+      }}
+    >
       <View style={styles.header}>
         <Image source={{ uri: item.avatarUrl }} style={styles.avatar} />
 
@@ -180,7 +187,13 @@ export default function PostItem({ item, onChat, editable }: PostItemProps) {
             <Text style={styles.footerBtnText}>Edit</Text>
           </TouchableOpacity>
         ) : (
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              width: '100%',
+            }}
+          >
             <TouchableOpacity
               style={styles.footerBtn}
               onPress={handleLikePress}

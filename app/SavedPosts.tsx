@@ -105,7 +105,11 @@ export default function SavedPosts() {
           ListFooterComponent={
             <View>
               {loadingRef.current ? (
-                <ActivityIndicator size="large" color={'#FFCC00'} style={{ marginVertical: 16 }}/>
+                <ActivityIndicator
+                  size="large"
+                  color={'#FFCC00'}
+                  style={{ marginVertical: 16 }}
+                />
               ) : null}
 
               {!hasMore && !loadingRef.current ? (
@@ -123,7 +127,7 @@ export default function SavedPosts() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#fff' },
-  container: { flex: 1, paddingHorizontal: 16, marginTop: 30 },
+  container: { flex: 1, paddingHorizontal: 8, marginTop: 30 },
 
   topBar: {
     flexDirection: 'row',

@@ -53,11 +53,11 @@ export default function FilterScreen({ navigation }: any) {
   const times = [
     {
       label: '7 Days',
-      value: '7d',
+      value: '7days',
     },
     {
       label: '30 Days',
-      value: '30d',
+      value: '30days',
     },
     {
       label: 'All Time',
@@ -107,7 +107,7 @@ export default function FilterScreen({ navigation }: any) {
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={24} color="#333" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>  Filter</Text>
+          <Text style={styles.headerTitle}> Filter</Text>
         </View>
 
         {/* Category */}
@@ -119,10 +119,16 @@ export default function FilterScreen({ navigation }: any) {
               <TouchableOpacity
                 key={t.label}
                 onPress={() => setSelectedType(t.value)}
-                style={[styles.chip, selectedType === t.value && styles.chipActive]}
+                style={[
+                  styles.chip,
+                  selectedType === t.value && styles.chipActive,
+                ]}
               >
                 <Text
-                  style={[styles.chipText, selectedType === t.value && styles.chipTextActive]}
+                  style={[
+                    styles.chipText,
+                    selectedType === t.value && styles.chipTextActive,
+                  ]}
                 >
                   {t.label}
                 </Text>
@@ -133,22 +139,28 @@ export default function FilterScreen({ navigation }: any) {
           {/* Category */}
           <Text style={styles.label}>Category</Text>
           <CategoryDropdown
-              categoryId={category}
-              setCategoryId={setCategory}
-              isShowLabel={false}
-            />
+            categoryId={category}
+            setCategoryId={setCategory}
+            isShowLabel={false}
+          />
 
           {/* Time */}
-          <Text style={[styles.label, {marginTop: 0}]}>Time</Text>
+          <Text style={[styles.label, { marginTop: 0 }]}>Time</Text>
           <View style={styles.row}>
             {times.map((t) => (
               <TouchableOpacity
                 key={t.label}
                 onPress={() => setTimeRange(t.value)}
-                style={[styles.chip, timeRange === t.value && styles.chipActive]}
+                style={[
+                  styles.chip,
+                  timeRange === t.value && styles.chipActive,
+                ]}
               >
                 <Text
-                  style={[styles.chipText, timeRange === t.value && styles.chipTextActive]}
+                  style={[
+                    styles.chipText,
+                    timeRange === t.value && styles.chipTextActive,
+                  ]}
                 >
                   {t.label}
                 </Text>
@@ -204,7 +216,9 @@ export default function FilterScreen({ navigation }: any) {
                 iconContainer: { top: 12, right: 8 },
               }}
               useNativeAndroidPickerStyle={false}
-              Icon={() => <Ionicons name="chevron-down" size={24} color="#ddd" />}
+              Icon={() => (
+                <Ionicons name="chevron-down" size={24} color="#ddd" />
+              )}
               placeholder={{ label: 'Select sort option', value: null }}
             />
           </View>
@@ -224,7 +238,7 @@ export default function FilterScreen({ navigation }: any) {
                   timeRange,
                   minPrice,
                   maxPrice,
-                  sortBy
+                  sortBy,
                 }),
               },
             });

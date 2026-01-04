@@ -1,17 +1,35 @@
+import { UserService } from '@/services/userService';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import { UserProfile } from 'firebase/auth';
+import React, { useEffect } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-
-interface HomeHeaderProps {}
 
 export default function HomeHeader() {
   const router = useRouter();
+  const [user, setUser] = React.useState<UserProfile | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  useEffect(() => {
+    loadUser();
+  }, []);
 
-  return (
+  const loadUser = async () => {
+    try {
+      const data = await UserService.getMe();
+      setUser(data);
+      await AsyncStorage.setItem('userProfile', JSON.stringify(data));
+    } catch (err) {
+      console.log('Load user failed:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return !loading ? (
     <View style={styles.header}>
       <Image
-        source={{ uri: 'https://i.pravatar.cc/100?img=8' }}
+        source={{ uri: user?.avatar_url as string | undefined }}
         style={styles.avatar}
       />
       <Pressable style={{ flex: 1 }} onPress={() => router.push('/NewPost')}>
@@ -21,7 +39,7 @@ export default function HomeHeader() {
         </View>
       </Pressable>
     </View>
-  );
+  ) : null;
 }
 
 const styles = StyleSheet.create({

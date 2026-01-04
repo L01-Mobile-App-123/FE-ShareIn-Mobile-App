@@ -10,7 +10,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <HomeHeader value={text} onChangeText={setText} />
+        <HomeHeader />
         <PostList />
       </View>
     </SafeAreaView>

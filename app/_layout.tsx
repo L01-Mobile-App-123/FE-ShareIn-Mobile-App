@@ -1,8 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
-import { Stack } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
 import { View, ActivityIndicator } from 'react-native';
 import * as Sentry from '@sentry/react-native';
+import { useScreenTracking } from '@/config/logScreen';
 
 Sentry.init({
   dsn: 'https://f6dffb87ce5ac1755558a06d2e2f6f17@o4510502288359424.ingest.de.sentry.io/4510650504249424',
@@ -17,39 +18,19 @@ Sentry.init({
   // Configure Session Replay
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1,
-  integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
+  integrations: [
+    Sentry.mobileReplayIntegration(),
+    Sentry.feedbackIntegration(),
+  ],
 
   // uncomment the line below to enable Spotlight (https://spotlightjs.com)
   // spotlight: __DEV__,
 });
 
 export default Sentry.wrap(function RootLayout() {
-  const [ready, setReady] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(true);
-
-  useEffect(() => {
-    checkOnboarding();
-  }, []);
-
-  const checkOnboarding = async () => {
-    const seen = await AsyncStorage.getItem('onboarding_seen');
-    setShowOnboarding(!seen);
-    setReady(true);
-  };
-
-  if (!ready) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color={'#FFCC00'} style={{ marginVertical: 16 }}/>
-      </View>
-    );
-  }
-
+  useScreenTracking();
   return (
-    <Stack
-      screenOptions={{ headerShown: false }}
-      initialRouteName={showOnboarding ? 'Onboarding' : '(auth)'}
-    >
+    <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Onboarding" />
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(tabs)" />

@@ -1,20 +1,20 @@
 import { CATEGORY_UI_MAP } from '@/constants/category';
 import {
-    InterestItem,
-    UserInterestService
+  InterestItem,
+  UserInterestService,
 } from '@/services/userInterestService';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    Alert,
-    FlatList,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import AddInterestCard from './AddInterestCard';
 

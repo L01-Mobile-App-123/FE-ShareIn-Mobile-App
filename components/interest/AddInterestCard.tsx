@@ -57,11 +57,8 @@ export default function AddInterestCard({
       <Text style={styles.subtitle}>Do you want to add it to Interest?</Text>
 
       {/* Category input */}
-      <CategoryDropdown
-        categoryId={categoryId}
-        setCategoryId={setCategoryId}
-      />
-      
+      <CategoryDropdown categoryId={categoryId} setCategoryId={setCategoryId} />
+
       {/* Keyword input */}
       <View style={styles.field}>
         <Text style={styles.label}>
@@ -115,7 +112,7 @@ export function CategoryDropdown({
       </View>
     );
   };
-  
+
   return (
     <View>
       <View style={styles.field}>

@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import PostItem, { Post } from '../components/home/PostItem';
 import { PostService } from '../services/postService';
 import { UserProfile, UserService } from '@/services/userService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function MyPosts() {
   const router = useRouter();
@@ -22,23 +23,6 @@ export default function MyPosts() {
 
   const pageRef = useRef(1);
   const loadingRef = useRef(false);
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadUser();
-  }, []);
-  
-  const loadUser = async () => {
-    try {
-      const data = await UserService.getMe();
-      setUser(data);
-    } catch (err) {
-      console.log('Load user failed:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchMyPosts = async () => {
     if (loadingRef.current || !hasMore) return;
@@ -57,15 +41,19 @@ export default function MyPosts() {
         return;
       }
 
-      const mapToPost = (item: any): Post => ({
+      const user = await AsyncStorage.getItem('userProfile').then((res) => {
+        return res ? (JSON.parse(res) as UserProfile) : null;
+      });
+
+      const mapToPost = async (item: any): Promise<Post> => ({
         post_id: item.post_id,
-        user_id: item.user_id,
-        authorName: user?.full_name || 'Unknown',
+        user_id: user?.user_id || '',
+        authorName: user?.full_name || '',
         avatarUrl: user?.avatar_url || '',
         timestamp: new Date(item.created_at).toLocaleDateString(),
         location: item.location,
         tag: item.transaction_type,
-        rating: Math.floor(((item.user?.reputation_score ?? 0) / 100) * 5),
+        rating: Math.floor(((user?.reputation_score ?? 0) / 100) * 5),
         content: item.description,
         images: item.image_urls,
         likesCount: item.view_count,
@@ -75,7 +63,7 @@ export default function MyPosts() {
         is_liked: item.is_liked,
         is_saved: item.is_saved,
       });
-      const mapped: Post[] = data.map(mapToPost);
+      const mapped: Post[] = await Promise.all(data.map(mapToPost));
       setPosts((prev) => {
         const map = new Map<string, Post>();
         for (const p of prev) map.set(p.post_id, p);
@@ -96,10 +84,8 @@ export default function MyPosts() {
       setPosts([]);
       setHasMore(true);
       pageRef.current = 1;
-      if (user !== null) {
-        fetchMyPosts();
-      }
-    }, [user]),
+      fetchMyPosts();
+    }, []),
   );
 
   return (
@@ -117,7 +103,7 @@ export default function MyPosts() {
         <FlatList
           data={posts}
           keyExtractor={(item) => item.post_id}
-          renderItem={({ item }) => <PostItem item={item} />}
+          renderItem={({ item }) => <PostItem key={item.post_id} item={item} />}
           onEndReached={fetchMyPosts}
           onEndReachedThreshold={0.5}
           showsVerticalScrollIndicator={false}
@@ -125,7 +111,11 @@ export default function MyPosts() {
           ListFooterComponent={
             <View>
               {loadingRef.current ? (
-                <ActivityIndicator size="large" color={'#FFCC00'} style={{ marginVertical: 16 }}/>
+                <ActivityIndicator
+                  size="large"
+                  color={'#FFCC00'}
+                  style={{ marginVertical: 16 }}
+                />
               ) : null}
 
               {!hasMore && !loadingRef.current ? (
@@ -143,7 +133,7 @@ export default function MyPosts() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#fff' },
-  container: { flex: 1, paddingHorizontal: 16, marginTop: 30 },
+  container: { flex: 1, paddingHorizontal: 8, marginTop: 30 },
 
   topBar: {
     flexDirection: 'row',

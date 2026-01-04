@@ -49,7 +49,7 @@ export const CATEGORY_UI_MAP: Record<string, CategoryUI> = {
     colors: ['#B7B7FF', '#8B8BFF'],
     icon: 'briefcase-outline',
     label: 'Dịch vụ & Khác',
-  }
+  },
 };
 
 type CategoryOption = {

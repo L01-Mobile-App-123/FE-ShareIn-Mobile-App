@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PostItem, { Post } from '../components/home/PostItem';
 import { PostService } from './../services/postService';
+import analytics from '@react-native-firebase/analytics';
 
 export default function PostDetail() {
   const router = useRouter();
@@ -21,6 +22,8 @@ export default function PostDetail() {
   const fetchPost = async () => {
     try {
       const data = await PostService.getPost(params.postId as string);
+
+      analytics().logEvent('post_view', { post_id: params.postId });
 
       const mapToPost = (item: any): Post => ({
         post_id: item.post_id,
@@ -68,7 +71,11 @@ export default function PostDetail() {
         {post ? (
           <PostItem item={post} />
         ) : (
-          <ActivityIndicator size="large" color={'#FFCC00'} style={{ marginVertical: 16 }}/>
+          <ActivityIndicator
+            size="large"
+            color={'#FFCC00'}
+            style={{ marginVertical: 16 }}
+          />
         )}
       </View>
     </SafeAreaView>

@@ -2,16 +2,15 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 
 export default function CreatePostScreen() {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -22,105 +21,113 @@ export default function CreatePostScreen() {
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-        Alert.alert('Permission required', 'Please allow photo access to upload images.');
-        return;
+      Alert.alert(
+        'Permission required',
+        'Please allow photo access to upload images.',
+      );
+      return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsMultipleSelection: true,
-        quality: 0.8,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
+      quality: 0.8,
     });
 
     if (!result.canceled) {
-        const selectedUris = result.assets.map((asset) => asset.uri);
-        setImages([...images, ...selectedUris]);
+      const selectedUris = result.assets.map((asset) => asset.uri);
+      setImages([...images, ...selectedUris]);
     }
-    };
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ flex: 1, backgroundColor: 'white' }}>
         {/* 🔸 HEADER */}
         <View style={styles.header}>
-            <TouchableOpacity style={styles.backBtn}>
+          <TouchableOpacity style={styles.backBtn}>
             <Ionicons name="arrow-back" size={22} color="black" />
             <Text style={styles.headerText}>Create a post</Text>
-            </TouchableOpacity>
+          </TouchableOpacity>
 
-            <TouchableOpacity style={styles.postBtn}>
+          <TouchableOpacity style={styles.postBtn}>
             <Text style={styles.postBtnText}>Post</Text>
-            </TouchableOpacity>
+          </TouchableOpacity>
         </View>
 
         {/* 🔸 NỘI DUNG */}
         <ScrollView contentContainerStyle={styles.scroll}>
-            {/* Avatar + Name */}
-            <View style={styles.profileRow}>
+          {/* Avatar + Name */}
+          <View style={styles.profileRow}>
             <Image
-                source={{ uri: 'https://i.pravatar.cc/100?img=8' }}
-                style={styles.avatar}
+              source={{ uri: 'https://i.pravatar.cc/100?img=8' }}
+              style={styles.avatar}
             />
             <Text style={styles.username}>Gia Nguyên</Text>
-            </View>
+          </View>
 
-            {/* Câu hỏi */}
-            <Text style={styles.question}>What do you want to trade or sell?</Text>
+          {/* Câu hỏi */}
+          <Text style={styles.question}>
+            What do you want to trade or sell?
+          </Text>
 
-            {/* Image Placeholder */}
-            <View style={styles.imageBox}>
+          {/* Image Placeholder */}
+          <View style={styles.imageBox}>
             {images.length === 0 ? (
-                <Text style={{ color: '#fff', fontWeight: '600' }}>Image</Text>
+              <Text style={{ color: '#fff', fontWeight: '600' }}>Image</Text>
             ) : (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {images.map((uri, idx) => (
-                    <Image
+                  <Image
                     key={idx}
                     source={{ uri }}
-                    style={{ width: 100, height: 100, borderRadius: 10, marginRight: 10 }}
+                    style={{
+                      width: 100,
+                      height: 100,
+                      borderRadius: 10,
+                      marginRight: 10,
+                    }}
                     resizeMode="cover"
-                    />
+                  />
                 ))}
-                </ScrollView>
+              </ScrollView>
             )}
-            </View>
+          </View>
 
-
-            {/* Category Button */}
-            <TouchableOpacity style={styles.categoryBtn}>
+          {/* Category Button */}
+          <TouchableOpacity style={styles.categoryBtn}>
             <Text style={styles.categoryText}>Category</Text>
-            </TouchableOpacity>
+          </TouchableOpacity>
 
-            {/* Tag Buttons */}
-            <View style={styles.tagsRow}>
+          {/* Tag Buttons */}
+          <View style={styles.tagsRow}>
             {tags.map((tag) => (
-                <TouchableOpacity
+              <TouchableOpacity
                 key={tag}
                 style={[
-                    styles.tagBtn,
-                    selectedTag === tag && styles.tagBtnActive,
+                  styles.tagBtn,
+                  selectedTag === tag && styles.tagBtnActive,
                 ]}
                 onPress={() => setSelectedTag(tag)}
-                >
+              >
                 <Text
-                    style={[
+                  style={[
                     styles.tagText,
                     selectedTag === tag && styles.tagTextActive,
-                    ]}
+                  ]}
                 >
-                    {tag}
+                  {tag}
                 </Text>
-                </TouchableOpacity>
+              </TouchableOpacity>
             ))}
-            </View>
+          </View>
         </ScrollView>
 
         {/* 🔸 FOOTER UPLOAD */}
         <TouchableOpacity style={styles.uploadBtn} onPress={pickImage}>
-        <Ionicons name="image-outline" size={20} color="black" />
-        <Text style={styles.uploadText}>Upload images</Text>
+          <Ionicons name="image-outline" size={20} color="black" />
+          <Text style={styles.uploadText}>Upload images</Text>
         </TouchableOpacity>
-
       </View>
     </SafeAreaView>
   );
