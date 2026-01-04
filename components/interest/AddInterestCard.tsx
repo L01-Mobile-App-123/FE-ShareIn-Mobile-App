@@ -4,15 +4,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  Pressable,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  Pressable,
-  Modal,
-  ActivityIndicator,
-  Alert,
+  View,
 } from 'react-native';
 
 export default function AddInterestCard({
@@ -117,7 +117,7 @@ export function CategoryDropdown({
   };
   
   return (
-    <>
+    <View>
       <View style={styles.field}>
         {isShowLabel && (
           <Text style={styles.label}>
@@ -158,7 +158,7 @@ export function CategoryDropdown({
           </View>
         </Pressable>
       </Modal>
-    </>
+    </View>
   );
 }
 

@@ -40,7 +40,7 @@ export default Sentry.wrap(function RootLayout() {
   if (!ready) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={'#FFCC00'} style={{ marginVertical: 16 }}/>
       </View>
     );
   }
@@ -58,6 +58,7 @@ export default Sentry.wrap(function RootLayout() {
       <Stack.Screen name="InterestScreen" />
       <Stack.Screen name="ProfileSetting" />
       <Stack.Screen name="SavedPosts" />
+      <Stack.Screen name="MyPosts" />
     </Stack>
   );
 });

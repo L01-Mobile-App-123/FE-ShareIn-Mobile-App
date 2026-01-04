@@ -227,7 +227,7 @@ export default function SettingScreen() {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator size="large" color={'#FFCC00'} style={{ marginVertical: 16 }}/>
             ) : (
               <Text style={styles.buttonText}>Update</Text>
             )}

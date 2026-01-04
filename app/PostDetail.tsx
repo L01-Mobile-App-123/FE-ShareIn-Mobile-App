@@ -1,9 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect, useRouter } from 'expo-router';
-import React, { useCallback, useRef, useState } from 'react';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
-  FlatList,
   Pressable,
   StyleSheet,
   Text,
@@ -13,31 +12,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import PostItem, { Post } from '../components/home/PostItem';
 import { PostService } from './../services/postService';
 
-export default function SavedPosts() {
+export default function PostDetail() {
   const router = useRouter();
+  const params = useLocalSearchParams();
 
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [hasMore, setHasMore] = useState(true);
+  const [post, setPost] = useState<Post | null>(null);
 
-  const pageRef = useRef(1);
-  const loadingRef = useRef(false);
-
-  const fetchSavedPosts = async () => {
-    if (loadingRef.current || !hasMore) return;
-
-    loadingRef.current = true;
-    const currentPage = pageRef.current;
-
+  const fetchPost = async () => {
     try {
-      const data = await PostService.getSaved({
-        page: currentPage,
-        limit: 20,
-      });
-
-      if (data.length === 0) {
-        setHasMore(false);
-        return;
-      }
+      const data = await PostService.getPost(params.postId as string);
 
       const mapToPost = (item: any): Post => ({
         post_id: item.post_id,
@@ -55,30 +38,18 @@ export default function SavedPosts() {
         status: item.status,
         is_available: item.is_available,
         is_liked: item.is_liked,
-        is_saved: true,
-      });
-      const mapped: Post[] = data.map(mapToPost);
-      setPosts((prev) => {
-        const map = new Map<string, Post>();
-        for (const p of prev) map.set(p.post_id, p);
-        for (const p of mapped) map.set(p.post_id, p);
-        return Array.from(map.values());
+        is_saved: item.is_saved,
       });
 
-      pageRef.current += 1;
+      setPost(mapToPost(data));
     } catch (e) {
       console.log(e);
-    } finally {
-      loadingRef.current = false;
     }
   };
 
   useFocusEffect(
     useCallback(() => {
-      setPosts([]);
-      setHasMore(true);
-      pageRef.current = 1;
-      fetchSavedPosts();
+      fetchPost();
     }, []),
   );
 
@@ -90,32 +61,15 @@ export default function SavedPosts() {
             <Pressable onPress={() => router.back()} style={styles.topBtn}>
               <Ionicons name="chevron-back" size={22} color="#000" />
             </Pressable>
-            <Text style={styles.topTitle}>Saved post</Text>
+            <Text style={styles.topTitle}>Post Detail</Text>
           </View>
         </View>
 
-        <FlatList
-          data={posts}
-          keyExtractor={(item) => item.post_id}
-          renderItem={({ item }) => <PostItem item={item} />}
-          onEndReached={fetchSavedPosts}
-          onEndReachedThreshold={0.5}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
-          ListFooterComponent={
-            <View>
-              {loadingRef.current ? (
-                <ActivityIndicator size="large" color={'#FFCC00'} style={{ marginVertical: 16 }}/>
-              ) : null}
-
-              {!hasMore && !loadingRef.current ? (
-                <Text style={styles.emptyText}>
-                  There is nothing more to show
-                </Text>
-              ) : null}
-            </View>
-          }
-        />
+        {post ? (
+          <PostItem item={post} />
+        ) : (
+          <ActivityIndicator size="large" color={'#FFCC00'} style={{ marginVertical: 16 }}/>
+        )}
       </View>
     </SafeAreaView>
   );

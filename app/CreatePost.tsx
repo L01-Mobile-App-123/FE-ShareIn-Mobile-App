@@ -16,7 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function CreatePostScreen() {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
-  const tags = ['Give away', 'Swap', 'Sell cheap'];
+  const tags = ['Free', 'Exchange', 'Sell'];
 
   const [images, setImages] = useState<string[]>([]);
   const pickImage = async () => {

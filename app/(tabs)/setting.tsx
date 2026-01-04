@@ -59,6 +59,10 @@ export default function SettingScreen() {
       title: 'Saved posts',
       route: '/SavedPosts',
     },
+    {
+      title: 'My posts',
+      route: '/MyPosts',
+    },
     { title: 'Sign out', route: '/Onboarding' },
   ];
 
@@ -97,7 +101,7 @@ export default function SettingScreen() {
                 router.push(item.route as never);
               }}
             >
-              <Text style={styles.menuText}>{item.title}</Text>
+              <Text style={[styles.menuText, {color: item.title === 'Sign out' ? '#FF3B30' : '#333'}]}>{item.title}</Text>
               <Ionicons name="chevron-forward" size={20} color="#999" />
             </TouchableOpacity>
           ))}

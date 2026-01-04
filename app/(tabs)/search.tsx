@@ -253,9 +253,9 @@ export default function SearchScreen() {
           <PostItem key={item.post_id} item={item} />
         ))}
 
-        <>
+        <View>
           {loadingRef.current ? (
-            <ActivityIndicator style={{ marginVertical: 16 }} />
+            <ActivityIndicator size="large" color={'#fff'} style={{ marginVertical: 16 }}/>
           ) : null}
 
           {hasMore && postList.length > 0 ? (
@@ -311,7 +311,7 @@ export default function SearchScreen() {
               <Ionicons name="arrow-back" size={24} color="#333" />
             </TouchableOpacity>
           ) : null} */}
-        </>
+        </View>
 
         {showAddnewInterest && <AddInterestCard initKeyword={query} />}
       </View>

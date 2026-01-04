@@ -109,7 +109,11 @@ export default function PostItem({ item, onChat, editable }: PostItemProps) {
     item.tag === 'BAN_RE' && item.price ? getMinMaxFromPrice(item.price) : null;
 
   return (
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={() => {
+      if (!editable) {
+        router.push(`/PostDetail?postId=${item.post_id}`);
+      }
+    }}>
       <View style={styles.header}>
         <Image source={{ uri: item.avatarUrl }} style={styles.avatar} />
 
@@ -176,7 +180,7 @@ export default function PostItem({ item, onChat, editable }: PostItemProps) {
             <Text style={styles.footerBtnText}>Edit</Text>
           </TouchableOpacity>
         ) : (
-          <>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
             <TouchableOpacity
               style={styles.footerBtn}
               onPress={handleLikePress}
@@ -208,10 +212,10 @@ export default function PostItem({ item, onChat, editable }: PostItemProps) {
               />
               <Text>{saved ? 'Saved' : 'Save'}</Text>
             </TouchableOpacity>
-          </>
+          </View>
         )}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

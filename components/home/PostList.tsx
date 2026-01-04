@@ -102,9 +102,9 @@ export default function PostList() {
         onEndReached={fetchPosts}
         onEndReachedThreshold={0.5}
         ListFooterComponent={
-          <>
+          <View>
             {loadingRef.current ? (
-              <ActivityIndicator style={{ marginVertical: 16 }} />
+              <ActivityIndicator size="large" color={'#fff'} style={{ marginVertical: 16 }}/>
             ) : null}
 
             {!hasMore && !loadingRef.current ? (
@@ -119,7 +119,7 @@ export default function PostList() {
                 There is nothing more to show
               </Text>
             ) : null}
-          </>
+          </View>
         }
       />
     </View>

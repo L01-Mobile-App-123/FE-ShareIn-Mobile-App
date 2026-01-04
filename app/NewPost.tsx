@@ -269,10 +269,10 @@ export default function NewPost() {
                 }
               >
                 {t === 'give'
-                  ? 'Give away'
+                  ? 'Free'
                   : t === 'swap'
-                    ? 'Swap'
-                    : 'Sell cheap'}
+                    ? 'Exchange'
+                    : 'Sell'}
               </Text>
             </Pressable>
           ))}

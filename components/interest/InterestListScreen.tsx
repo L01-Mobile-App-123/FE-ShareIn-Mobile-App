@@ -1,23 +1,22 @@
+import { CATEGORY_UI_MAP } from '@/constants/category';
+import {
+    InterestItem,
+    UserInterestService
+} from '@/services/userInterestService';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  TextInput,
-  Alert,
+    Alert,
+    FlatList,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import AddInterestCard from './AddInterestCard';
-import {
-  InterestItem,
-  UserInterest,
-  UserInterestService,
-} from '@/services/userInterestService';
-import { CATEGORY_UI_MAP } from '@/constants/category';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 
 export default function InterestListScreen() {
   const [showAddInterestCard, setShowAddInterestCard] = useState(false);
@@ -119,7 +118,7 @@ export default function InterestListScreen() {
         refreshing={refreshing}
         onRefresh={onRefresh}
         ListHeaderComponent={
-          <>
+          <View>
             {/* Header */}
             <View style={styles.header}>
               <TouchableOpacity onPress={() => router.back()}>
@@ -153,7 +152,7 @@ export default function InterestListScreen() {
               Your interests{' '}
               <Text style={{ color: 'red' }}>({interests.length})</Text>
             </Text>
-          </>
+          </View>
         }
         ListEmptyComponent={
           !loading ? (
