@@ -1,9 +1,44 @@
+import { getSocket } from '@/services/chatSocket';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
-export default function ChatInput() {
+export default function ChatInput({
+  conversationId,
+  onLocalSend,
+}: {
+  conversationId: string;
+  onLocalSend: (text: string) => void;
+}) {
+  // console.log('ChatInput rendered');
+
   const [text, setText] = useState('');
+
+  const handleSend = () => {
+    const socket = getSocket();
+
+    if (!socket) {
+      console.log('No socket');
+      return;
+    }
+    if (!conversationId) {
+      console.log('No conversationId');
+      return;
+    }
+    if (!text.trim()) return;
+
+    const payload = {
+      conversationId,
+      content: text,
+      messageType: 'TEXT',
+    };
+
+    console.log('Emit send_message:', payload);
+    socket.emit('send_message', payload);
+
+    onLocalSend(text); // hiển thị ngay
+    setText('');
+  };
 
   return (
     <View>
@@ -15,9 +50,9 @@ export default function ChatInput() {
           value={text}
           onChangeText={setText}
         />
-        <TouchableOpacity style={styles.sendBtn}>
+        <Pressable style={styles.sendBtn} onPress={handleSend}>
           <Ionicons name="send-outline" size={22} color="#fff" />
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );
@@ -32,6 +67,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 0.5,
     borderColor: '#ddd',
     backgroundColor: '#fff',
+    // pointerEvents: 'box-none',
   },
   input: {
     flex: 1,

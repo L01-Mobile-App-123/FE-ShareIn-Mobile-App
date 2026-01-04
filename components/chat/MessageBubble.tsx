@@ -29,7 +29,7 @@ export default function MessageBubble({
         style={[
           styles.bubble,
           {
-            backgroundColor: isSender ? '#FDD835' : '#A86F52',
+            backgroundColor: isSender ? '#E8DB4B' : '#A86F52',
             borderBottomLeftRadius: isSender ? 20 : 5,
             borderBottomRightRadius: isSender ? 5 : 20,
           },

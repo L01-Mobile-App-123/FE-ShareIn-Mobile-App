@@ -53,6 +53,9 @@ export default function OldPost() {
         likesCount: item.view_count ?? 0,
         price: Number(item.price) || 0,
         status: item.status,
+        is_available: item.is_available,
+        is_liked: item.is_liked,
+        is_saved: item.is_saved,
       }));
 
       setPosts((prev) => {

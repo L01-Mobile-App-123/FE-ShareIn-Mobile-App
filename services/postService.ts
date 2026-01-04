@@ -21,6 +21,8 @@ export type Post = {
   created_at: string;
   user: any;
   image_urls: string[];
+  is_liked: boolean;
+  is_saved: boolean;
 };
 
 export type CreatePostDto = {
