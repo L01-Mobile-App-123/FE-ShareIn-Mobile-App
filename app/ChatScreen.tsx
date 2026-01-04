@@ -38,7 +38,7 @@ export default function ChatScreen() {
     }).then((res) => {
       setConversationId(res.conversation_id);
     });
-  }, [userId]);
+  }, [userId, postId]);
 
   useEffect(() => {
     if (!conversationId) return;
@@ -51,21 +51,20 @@ export default function ChatScreen() {
       const mapped: ChatMessage[] = res.data.map((m) => ({
         id: m.message_id,
         message: m.content,
-        isSender: m.sender_id === userId,
+        senderId: m.sender_id,
         avatar: m.sender.avatar_url,
       }));
 
       setMessages(mapped);
       ConversationService.markAsRead(conversationId);
     });
-  }, [conversationId, userId]);
+  }, [conversationId]);
 
   useEffect(() => {
     if (user_name) setPartnerName(String(user_name));
     if (avatar) setPartnerAvatar(String(avatar));
   }, [user_name, avatar]);
 
-  // Sau khi có conversationId, gắn listener
   useEffect(() => {
     if (!conversationId || !userId) return;
 
@@ -79,7 +78,7 @@ export default function ChatScreen() {
         {
           id: payload.message_id,
           message: payload.content,
-          isSender: false,
+          senderId: payload.sender_id,
           avatar: payload.sender?.avatar_url,
         },
       ]);
@@ -89,16 +88,18 @@ export default function ChatScreen() {
       socket.off('new_message');
     };
   }, [conversationId, userId]);
+
   const handleLocalSend = (text: string) => {
     setMessages((prev) => [
       ...prev,
       {
         id: Date.now().toString(),
         message: text,
-        isSender: true,
+        senderId: String(userId),
       },
     ]);
   };
+
   useEffect(() => {
     if (!userId) return;
     connectSocket(String(userId));
@@ -123,7 +124,8 @@ export default function ChatScreen() {
           onBackPress={handleGoBack}
         />
 
-        <ChatArea messages={messages} />
+        <ChatArea messages={messages} recipientId={String(userId)} />
+
         {conversationId && (
           <ChatInput
             conversationId={conversationId}

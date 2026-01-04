@@ -128,6 +128,7 @@ export const ConversationService = {
     const res = await ApiClient.get(
       `/api/v1/conversations/${conversationId}/messages${query}`,
     );
+    console.log('getMessages raw:', JSON.stringify(res.data, null, 2));
     return res.data;
   },
 

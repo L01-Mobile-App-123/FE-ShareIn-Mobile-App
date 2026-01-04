@@ -36,7 +36,7 @@ export default function MessageBubble({
         ]}
       >
         <Text style={[styles.text, { color: isSender ? '#000' : '#fff' }]}>
-          {message}
+          {String(message)}
         </Text>
       </View>
     </View>
