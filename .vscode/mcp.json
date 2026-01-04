@@ -1,7 +1,7 @@
 {
   "servers": {
     "Sentry": {
-      "url": "https://mcp.sentry.dev/mcp/mobildeapp123/react-native-vm",
+      "url": "https://mcp.sentry.dev/mcp/mobildeapp123/share-in",
       "type": "http"
     }
   }

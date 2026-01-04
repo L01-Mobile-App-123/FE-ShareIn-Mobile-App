@@ -46,16 +46,16 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      "expo-speech-recognition",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "share-in",
+          "organization": "mobildeapp123"
+        }
       ]
-      // "expo-speech-recognition",
-      // [
-      //   "@sentry/react-native/expo",
-      //   {
-      //     "url": "https://sentry.io/",
-      //     "project": "react-native-vm",
-      //     "organization": "mobildeapp123"
-      //   }
-      // ]
     ],
     "experiments": {
       "typedRoutes": true,

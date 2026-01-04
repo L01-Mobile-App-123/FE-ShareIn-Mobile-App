@@ -46,6 +46,15 @@ export default function SearchScreen() {
     try {
       setRefreshing(true);
       setPostList([]);
+      setShowAddnewInterest(false);
+      setSuggestions([]);
+      setQuery('');
+      setCategory('');
+      setSelectedType('');
+      setMinPrice('');
+      setMaxPrice('');
+      setSortBy('');
+      setTimeRange('');
       pageRef.current = 1;
       setHasMore(true);
       await fetchHistory();
@@ -67,9 +76,9 @@ export default function SearchScreen() {
     if (params.filters) {
       try {
         const parsed = JSON.parse(params.filters as string);
-
+        setQuery(parsed.query ?? '');
         setCategory(parsed.category ?? '');
-        setSelectedType(parsed.type ?? '');
+        setSelectedType(parsed.selectedType ?? '');
         setMinPrice(parsed.minPrice ?? '');
         setMaxPrice(parsed.maxPrice ?? '');
         setSortBy(parsed.sortBy ?? '');
@@ -140,7 +149,7 @@ export default function SearchScreen() {
             />
           </View>
           <TouchableOpacity
-            onPress={async () => {
+            onPress={async () => { 
               const data = await SearchService.search({
                 keyword: query,
                 transactionType: selectedType,
@@ -177,6 +186,7 @@ export default function SearchScreen() {
                 pathname: '/FilterScreen',
                 params: {
                   filters: JSON.stringify({
+                    query: query ?? '',
                     category,
                     selectedType,
                     timeRange,
@@ -201,6 +211,9 @@ export default function SearchScreen() {
         {/* Pop up suggestions */}
         {suggestions.length > 0 && (
           <View style={{ padding: 20 }}>
+            <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 10 }}>
+              Suggestions
+            </Text>
             {suggestions.map((item, index) => (
               <TouchableOpacity
                 key={index}
@@ -245,20 +258,7 @@ export default function SearchScreen() {
             <ActivityIndicator style={{ marginVertical: 16 }} />
           ) : null}
 
-          {!hasMore && !loadingRef.current ? (
-            <Text
-              style={{
-                textAlign: 'center',
-                color: '#888',
-                marginVertical: 12,
-                fontSize: 12,
-              }}
-            >
-              There is nothing more to show
-            </Text>
-          ) : null}
-
-          {hasMore ? (
+          {hasMore && postList.length > 0 ? (
             <TouchableOpacity
               onPress={async () => {
                 loadingRef.current = true;
@@ -285,7 +285,7 @@ export default function SearchScreen() {
             </TouchableOpacity>
           ) : null}
 
-          {pageRef.current !== 1 ? (
+          {/* {pageRef.current !== 1 && postList.length > 0 ? (
             <TouchableOpacity
               onPress={async () => {
                 loadingRef.current = true;
@@ -310,10 +310,10 @@ export default function SearchScreen() {
             >
               <Ionicons name="arrow-back" size={24} color="#333" />
             </TouchableOpacity>
-          ) : null}
+          ) : null} */}
         </>
 
-        {showAddnewInterest && <AddInterestCard />}
+        {showAddnewInterest && <AddInterestCard initKeyword={query} />}
       </View>
     </ScrollView>
   );

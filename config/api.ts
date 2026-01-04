@@ -111,6 +111,7 @@ class ApiClient {
   // ===== PUBLIC METHODS =====
 
   static get(path: string, params?: QueryParams) {
+    console.log('GET Request to:', path, 'with params:', params);
     return this.request(path, { method: 'GET' }, params);
   }
 

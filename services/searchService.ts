@@ -26,17 +26,15 @@ export const SearchService = {
   ): Promise<SearchResponse<T>> {
     const res = await ApiClient.get('/api/v1/search', cleanPayload({
       keyword: params.keyword,
-      transaction_type: params.transactionType,
-      category_id: params.categoryId,
-      time_range: params.timeRange,
-      sort_by: params.sortBy,
-      min_price: params.minPrice,
-      max_price: params.maxPrice,
+      transactionType: params.transactionType,
+      categoryId: params.categoryId,
+      timeRange: params.timeRange,
+      sortBy: params.sortBy,
+      minPrice: params.minPrice,
+      maxPrice: params.maxPrice,
       page: params.page,
       limit: params.limit,
     }));
-
-    console.log('SearchService.search response:', res.data);
 
     return res.data;
   },

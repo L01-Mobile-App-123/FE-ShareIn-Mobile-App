@@ -92,7 +92,7 @@ export default function PostList() {
   );
 
   return (
-    <View style={{ paddingHorizontal: 16 }}>
+    <View>
       <FlatList
         data={posts}
         keyExtractor={(item) => item.post_id}

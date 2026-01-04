@@ -17,10 +17,12 @@ import {
 
 export default function AddInterestCard({
   isFullWidth,
+  initKeyword = '',
 }: {
   isFullWidth?: boolean;
+  initKeyword?: string;
 }) {
-  const [keyword, setKeyword] = useState('');
+  const [keyword, setKeyword] = useState(initKeyword);
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -92,9 +94,11 @@ export default function AddInterestCard({
 export function CategoryDropdown({
   categoryId,
   setCategoryId,
+  isShowLabel = true,
 }: {
   categoryId: string | null;
   setCategoryId: (id: string) => void;
+  isShowLabel?: boolean;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -115,9 +119,11 @@ export function CategoryDropdown({
   return (
     <>
       <View style={styles.field}>
-        <Text style={styles.label}>
-          Category <Text style={styles.required}>*</Text>
-        </Text>
+        {isShowLabel && (
+          <Text style={styles.label}>
+            Category <Text style={styles.required}>*</Text>
+          </Text>
+        )}
 
         <Pressable style={styles.dropdown} onPress={() => setOpen(true)}>
           {categoryId ? (
@@ -219,6 +225,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     justifyContent: 'center',
+    width: '100%',
   },
 
   placeholder: { color: '#999' },

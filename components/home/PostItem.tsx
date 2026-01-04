@@ -82,6 +82,19 @@ export default function PostItem({ item, onChat, editable }: PostItemProps) {
     });
   };
 
+  const itemTagText = () => {
+    switch (item.tag) {
+      case 'BAN_RE':
+        return 'Sell';
+      case 'CHO_MIEN_PHI':
+        return 'Free';
+      case 'DOI_DO':
+        return 'Exchange';  
+      default:
+        return item.tag;
+    } 
+  };
+
   const formatMoney = (n: number) =>
     n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
@@ -124,7 +137,7 @@ export default function PostItem({ item, onChat, editable }: PostItemProps) {
 
       <View style={styles.tagRow}>
         <View style={styles.tagContainer}>
-          <Text style={styles.tagText}>{item.tag}</Text>
+          <Text style={styles.tagText}>{itemTagText()}</Text>
         </View>
 
         {item.tag === 'BAN_RE' && minMax && (
