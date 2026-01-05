@@ -30,9 +30,15 @@ interface PostItemProps {
   saved?: boolean;
   onChat?: (user_id: string) => void;
   editable?: boolean;
+  feedback?: boolean;
 }
 
-export default function PostItem({ item, onChat, editable }: PostItemProps) {
+export default function PostItem({
+  item,
+  onChat,
+  editable,
+  feedback,
+}: PostItemProps) {
   const [liked, setLiked] = useState(item.is_liked === true);
   const [saved, setSaved] = useState(item.is_saved === true);
 
@@ -74,14 +80,24 @@ export default function PostItem({ item, onChat, editable }: PostItemProps) {
   };
 
   const handleChatPress = () => {
+    console.log('handleChatPress', {
+      user_id: item.user_id,
+      user_name: item.authorName,
+      avatar: item.avatarUrl,
+      postId: item.post_id,
+    });
+
     onChat?.(item.user_id);
     analytics().logEvent('initiate_chat', { user_id: item.user_id });
+
     router.push({
       pathname: '/ChatScreen',
       params: {
-        id: item.user_id,
-        name: item.authorName,
+        userId: item.user_id,
+        user_name: item.authorName,
         avatar: item.avatarUrl,
+        postId: item.post_id,
+        init: 'true',
       },
     });
   };
@@ -177,57 +193,53 @@ export default function PostItem({ item, onChat, editable }: PostItemProps) {
         ) : null}
       </View>
 
-      <View style={[styles.footer, editable && styles.footerEditable]}>
-        {editable ? (
-          <TouchableOpacity
-            style={styles.footerBtn}
-            onPress={() => router.push(`/NewPost?editId=${item.post_id}`)}
-          >
-            <Ionicons name="create-outline" size={22} color="black" />
-            <Text style={styles.footerBtnText}>Edit</Text>
-          </TouchableOpacity>
-        ) : (
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              width: '100%',
-            }}
-          >
+      {!feedback && (
+        <View style={[styles.footer, editable && styles.footerEditable]}>
+          {editable ? (
             <TouchableOpacity
               style={styles.footerBtn}
-              onPress={handleLikePress}
+              onPress={() => router.push(`/NewPost?editId=${item.post_id}`)}
             >
-              <Ionicons
-                name={liked ? 'heart' : 'heart-outline'}
-                size={24}
-                color={liked ? 'red' : 'black'}
-              />
-              <Text>{liked ? item.likesCount + 1 : item.likesCount}</Text>
+              <Ionicons name="create-outline" size={22} color="black" />
+              <Text style={styles.footerBtnText}>Edit</Text>
             </TouchableOpacity>
+          ) : (
+            <>
+              <TouchableOpacity
+                style={styles.footerBtn}
+                onPress={handleLikePress}
+              >
+                <Ionicons
+                  name={liked ? 'heart' : 'heart-outline'}
+                  size={24}
+                  color={liked ? 'red' : 'black'}
+                />
+                <Text>{liked ? item.likesCount + 1 : item.likesCount}</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.footerBtn}
-              onPress={handleChatPress}
-            >
-              <Ionicons name="chatbubble-outline" size={22} color="black" />
-              <Text style={styles.footerBtnText}>Chat</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.footerBtn}
+                onPress={handleChatPress}
+              >
+                <Ionicons name="chatbubble-outline" size={22} color="black" />
+                <Text style={styles.footerBtnText}>Chat</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.footerBtn}
-              onPress={handleSavePress}
-            >
-              <Ionicons
-                name={saved ? 'bookmark' : 'bookmark-outline'}
-                size={22}
-                color={saved ? 'blue' : 'black'}
-              />
-              <Text>{saved ? 'Saved' : 'Save'}</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
+              <TouchableOpacity
+                style={styles.footerBtn}
+                onPress={handleSavePress}
+              >
+                <Ionicons
+                  name={saved ? 'bookmark' : 'bookmark-outline'}
+                  size={22}
+                  color={saved ? 'blue' : 'black'}
+                />
+                <Text>{saved ? 'Saved' : 'Save'}</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+      )}
     </TouchableOpacity>
   );
 }

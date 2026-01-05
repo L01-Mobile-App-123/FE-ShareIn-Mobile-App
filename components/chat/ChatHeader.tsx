@@ -1,14 +1,19 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
+import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface ChatHeaderProps {
-  onInfoPress: () => void;
+  name: string;
+  avatar?: string;
+  onStarPress: () => void;
   isBlocked: boolean;
   onBackPress?: () => void;
 }
 
 export default function ChatHeader({
-  onInfoPress,
+  name,
+  avatar,
+  onStarPress,
   isBlocked,
   onBackPress,
 }: ChatHeaderProps) {
@@ -18,23 +23,14 @@ export default function ChatHeader({
         <TouchableOpacity onPress={onBackPress}>
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Image
-          source={{ uri: 'https://i.pravatar.cc/100?img=3' }}
-          style={styles.avatar}
-        />
-        <Text style={styles.name}>Gia Nguyên</Text>
+        <Image source={{ uri: avatar }} style={styles.avatar} />
+        <Text style={styles.name}>{name}</Text>
       </View>
 
       <View style={styles.rightGroup}>
-        <Ionicons name="call-outline" size={22} color="#000" />
-        {/* <Ionicons name="videocam-outline" size={22} color="#000" /> */}
         {!isBlocked && (
-          <TouchableOpacity onPress={onInfoPress}>
-            <Ionicons
-              name="information-circle-outline"
-              size={22}
-              color="#000"
-            />
+          <TouchableOpacity onPress={onStarPress}>
+            <Feather name="star" size={24} color="#000" />
           </TouchableOpacity>
         )}
       </View>
@@ -55,6 +51,6 @@ const styles = StyleSheet.create({
   },
   leftGroup: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   rightGroup: { flexDirection: 'row', alignItems: 'center', gap: 18 },
-  avatar: { width: 40, height: 40, borderRadius: 20 },
+  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#ddd' },
   name: { fontWeight: '700', fontSize: 16 },
 });

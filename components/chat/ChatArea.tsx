@@ -1,45 +1,50 @@
-import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import MessageBubble from './MessageBubble';
 
 export type ChatMessage = {
   id: string;
   message: string;
-  isSender?: boolean;
+  senderId: string; // thêm field này
   avatar?: string;
 };
 
 type ChatAreaProps = {
-  messages: ChatMessage[]; // bắt buộc phải truyền vào
+  messages: ChatMessage[];
+  recipientId: string;
 };
 
-export default function ChatArea({ messages }: ChatAreaProps) {
+export default function ChatArea({ messages, recipientId }: ChatAreaProps) {
   return (
-    <View style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        {messages.map((m) => (
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={styles.contentContainer}
+    >
+      {messages.map((m) => {
+        console.log(
+          'render message id:',
+          m.id,
+          'senderId:',
+          m.senderId,
+          'recipientId:',
+          recipientId,
+        );
+
+        const isSender = m.senderId !== recipientId;
+
+        return (
           <MessageBubble
             key={m.id}
             message={m.message}
-            isSender={m.isSender}
+            isSender={isSender}
             avatar={m.avatar}
           />
-        ))}
-      </ScrollView>
-    </View>
+        );
+      })}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-  },
-  contentContainer: {
-    paddingTop: 12,
-    paddingBottom: 12,
-  },
+  container: { flex: 1, backgroundColor: 'white' },
+  contentContainer: { paddingTop: 12, paddingBottom: 12 },
 });

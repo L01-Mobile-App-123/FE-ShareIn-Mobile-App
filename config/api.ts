@@ -15,12 +15,10 @@ export function cleanPayload<T extends Record<string, any>>(
 export function toISODate(date?: string | null): string | undefined {
   if (!date) return undefined;
 
-  // ISO rồi → dùng luôn
   if (date.includes('T') && date.endsWith('Z')) {
     return date;
   }
 
-  // YYYY-MM-DD
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
   if (!match) return undefined;
 
@@ -31,14 +29,12 @@ export function toISODate(date?: string | null): string | undefined {
 class ApiClient {
   private static API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-  /** Firebase token */
   private static async getFirebaseToken(): Promise<string | null> {
     const user = auth.currentUser;
     if (!user) return null;
     return await user.getIdToken();
   }
 
-  /** Build query string */
   private static buildQuery(params?: QueryParams) {
     if (!params) return '';
 
@@ -52,11 +48,11 @@ class ApiClient {
     return query ? `?${query}` : '';
   }
 
-  /** Upload file */
   static async patchFile(path: string, formData: FormData) {
     const token = await this.getFirebaseToken();
+    const url = `${this.API_URL}${path}`;
 
-    const res = await fetch(`${this.API_URL}${path}`, {
+    const res = await fetch(url, {
       method: 'PATCH',
       headers: {
         ...(token && { Authorization: `Bearer ${token}` }),
@@ -64,18 +60,21 @@ class ApiClient {
       body: formData,
     });
 
+    const raw = await res.text();
+    let data: any = raw;
+    try {
+      data = raw ? JSON.parse(raw) : null;
+    } catch {}
+
     if (!res.ok) {
-      const errorText = await res.text();
-      console.log('API Error:', res.status, errorText);
-      throw new Error(errorText || 'API request failed');
-    } else {
-      console.log('API Success:', res.status, path);
+      console.log('API ERROR RESPONSE:', { status: res.status, url, data });
+      throw new Error(data?.message || raw || 'API request failed');
     }
 
-    return res.json();
+    console.log('API Success:', res.status, path);
+    return data;
   }
 
-  /** Request chung */
   private static async request(
     path: string,
     options: RequestInit = {},
@@ -83,12 +82,9 @@ class ApiClient {
   ) {
     const token = await this.getFirebaseToken();
     const query = this.buildQuery(params);
+    const url = `${this.API_URL}${path}${query}`;
 
-    if (path == '/api/v1/auth/verify') {
-      console.log('TOKEN:', token);
-    }
-
-    const res = await fetch(`${this.API_URL}${path}${query}`, {
+    const res = await fetch(url, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
@@ -97,18 +93,24 @@ class ApiClient {
       },
     });
 
+    const raw = await res.text();
+    let data: any = raw;
+    try {
+      data = raw ? JSON.parse(raw) : null;
+    } catch {}
+
     if (!res.ok) {
-      const errorText = await res.text();
-      console.log('API Error:', res.status, errorText);
-      throw new Error(errorText || 'API request failed');
-    } else {
-      console.log('API Success:', res.status, path);
+      console.log('API ERROR RESPONSE:', { status: res.status, url, data });
+      throw new Error(
+        typeof data === 'string'
+          ? data
+          : data?.message || JSON.stringify(data) || 'API request failed',
+      );
     }
 
-    return res.json();
+    console.log('API Success:', res.status, path);
+    return data;
   }
-
-  // ===== PUBLIC METHODS =====
 
   static get(path: string, params?: QueryParams) {
     console.log('GET Request to:', path, 'with params:', params);

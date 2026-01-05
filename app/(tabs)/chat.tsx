@@ -1,104 +1,108 @@
 import ChatItem from '@/components/chat/ChatItem';
-import ChatSearchBar from '@/components/chat/ChatSearchBar';
-import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { ConversationService } from '@/services/conversationService';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Giả lập dữ liệu API
-const mockMessages = [
-  {
-    id: '1',
-    name: 'Nguyên',
-    message: 'New message received',
-    avatar: 'https://i.pravatar.cc/100?img=1',
-  },
-  {
-    id: '2',
-    name: 'Lan',
-    message: 'Hello! How are you?',
-    avatar: 'https://i.pravatar.cc/100?img=2',
-  },
-  {
-    id: '3',
-    name: 'Minh',
-    message: 'Let’s meet tomorrow',
-    avatar: 'https://i.pravatar.cc/100?img=3',
-  },
-  {
-    id: '4',
-    name: 'An',
-    message: 'Project update ready',
-    avatar: 'https://i.pravatar.cc/100?img=4',
-  },
-  {
-    id: '5',
-    name: 'Nguyên',
-    message: 'See you soon',
-    avatar: 'https://i.pravatar.cc/100?img=5',
-  },
-  {
-    id: '6',
-    name: 'Minh',
-    message: 'Let’s meet tomorrow',
-    avatar: 'https://i.pravatar.cc/100?img=3',
-  },
-  {
-    id: '7',
-    name: 'An',
-    message: 'Project update ready',
-    avatar: 'https://i.pravatar.cc/100?img=4',
-  },
-  {
-    id: '8',
-    name: 'Nguyên',
-    message: 'See you soon',
-    avatar: 'https://i.pravatar.cc/100?img=5',
-  },
-];
-
 export default function Chat() {
+  const router = useRouter();
   const [search, setSearch] = useState('');
-  const [filteredData, setFilteredData] = useState(mockMessages);
+  const [conversations, setConversations] = useState<any[]>([]);
 
   useEffect(() => {
-    if (search.trim() === '') {
-      setFilteredData(mockMessages);
-    } else {
-      const lower = search.toLowerCase();
-      const filtered = mockMessages.filter(
-        (item) =>
-          item.name.toLowerCase().includes(lower) ||
-          item.message.toLowerCase().includes(lower),
-      );
-      setFilteredData(filtered);
-    }
-  }, [search]);
+    ConversationService.getAll().then(setConversations);
+  }, []);
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return conversations;
+    const q = search.toLowerCase();
+    return conversations.filter(
+      (c) =>
+        c.partner.full_name.toLowerCase().includes(q) ||
+        (c.last_message ?? '').toLowerCase().includes(q),
+    );
+  }, [search, conversations]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <ChatSearchBar search={search} setSearch={setSearch} />
-        <FlatList
-          data={filteredData}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <ChatItem item={item} />}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 30 }}
-        />
+      <View style={styles.header}>
+        <Pressable onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={24} color="#222" />
+        </Pressable>
+        <Text style={styles.title}>Chat</Text>
       </View>
+
+      <View style={styles.searchWrap}>
+        <Text style={styles.searchLabel}>Search</Text>
+        <View style={styles.searchInputWrap}>
+          <TextInput
+            value={search}
+            onChangeText={setSearch}
+            style={styles.searchInput}
+          />
+        </View>
+      </View>
+
+      <FlatList
+        data={filtered}
+        keyExtractor={(item) => item.conversation_id}
+        renderItem={({ item }) => <ChatItem item={item} />}
+        contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
-  content: {
-    backgroundColor: 'white',
-    // flex: 1,
-    paddingTop: 20,
+  container: { flex: 1, backgroundColor: 'white' },
+
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginLeft: 8,
+    color: '#222',
+  },
+
+  searchWrap: {
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  searchLabel: {
+    fontSize: 13,
+    color: '#999',
+    marginBottom: 6,
+  },
+  searchInputWrap: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    height: 42,
+    justifyContent: 'center',
+  },
+  searchInput: {
+    fontSize: 15,
+    color: '#222',
+  },
+
+  list: {
+    paddingHorizontal: 16,
+    paddingBottom: 30,
   },
 });
