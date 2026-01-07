@@ -6,11 +6,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ChatArea, { ChatMessage } from '@/components/chat/ChatArea';
 import ChatHeader from '@/components/chat/ChatHeader';
 import ChatInput from '@/components/chat/ChatInput';
-import { connectSocket } from '@/services/chatSocket';
+import { getSocket } from '@/services/chatSocket';
 import { ConversationService } from '@/services/conversationService';
 import { UserService } from '@/services/userService';
 
 export default function ChatScreen() {
+  const [socket, setSocket] = useState<any>(null);
+
+  useEffect(() => {
+    const s = getSocket();
+    if (s) setSocket(s);
+  }, []);
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [partnerName, setPartnerName] = useState('');
   const [partnerAvatar, setPartnerAvatar] = useState<string | undefined>();
@@ -75,9 +82,9 @@ export default function ChatScreen() {
   useEffect(() => {
     if (!conversationId || !myUserId) return;
 
-    const socket = connectSocket(myUserId);
+    // const socket = connectSocket(myUserId);
 
-    socket.on('new_message', (payload) => {
+    socket.on('new_message', (payload: any) => {
       if (payload.conversationId !== conversationId) return;
 
       setMessages((prev) => [
@@ -93,7 +100,7 @@ export default function ChatScreen() {
 
     return () => {
       socket.off('new_message');
-      socket.disconnect();
+      // socket.disconnect();
     };
   }, [conversationId, myUserId]);
 

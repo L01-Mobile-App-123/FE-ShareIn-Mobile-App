@@ -1,8 +1,10 @@
 import ChatItem from '@/components/chat/ChatItem';
+import { connectSocket } from '@/services/chatSocket';
 import { ConversationService } from '@/services/conversationService';
+import { UserService } from '@/services/userService';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
   Pressable,
@@ -31,6 +33,24 @@ export default function Chat() {
         (c.last_message ?? '').toLowerCase().includes(q),
     );
   }, [search, conversations]);
+
+  const [myUserId, setMyUserId] = useState<string | null>(null); // 👈 thêm
+
+  useEffect(() => {
+    ConversationService.getAll().then(setConversations);
+  }, []);
+
+  // 👇 lấy user giống ChatScreen
+  useEffect(() => {
+    UserService.getMe().then((me) => setMyUserId(me.user_id));
+  }, []);
+
+  // 👇 connect socket khi đã có userId
+  useEffect(() => {
+    if (myUserId) {
+      connectSocket(myUserId);
+    }
+  }, [myUserId]);
 
   return (
     <SafeAreaView style={styles.container}>
