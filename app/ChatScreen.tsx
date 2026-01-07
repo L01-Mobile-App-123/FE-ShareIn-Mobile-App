@@ -48,6 +48,13 @@ export default function ChatScreen() {
       page: 1,
       limit: 50,
     }).then((res) => {
+      console.log(
+        '[MSG][API] loaded',
+        res.data.length,
+        'messages at',
+        new Date().toISOString(),
+      );
+
       const mapped: ChatMessage[] = res.data.map((m) => ({
         id: m.message_id,
         message: m.content,
@@ -71,6 +78,13 @@ export default function ChatScreen() {
     const socket = connectSocket(String(userId));
 
     socket.on('new_message', (payload) => {
+      console.log(
+        '[MSG][SOCKET] message',
+        payload,
+        'at',
+        new Date().toISOString(),
+      );
+
       if (payload.conversationId !== conversationId) return;
 
       setMessages((prev) => [
@@ -90,6 +104,13 @@ export default function ChatScreen() {
   }, [conversationId, userId]);
 
   const handleLocalSend = (text: string) => {
+    console.log(
+      '[MSG][LOCAL] send at',
+      new Date().toISOString(),
+      'text:',
+      text,
+    );
+
     setMessages((prev) => [
       ...prev,
       {

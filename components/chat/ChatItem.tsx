@@ -1,7 +1,7 @@
 import { Post, PostService } from '@/services/postService';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 export interface ConversationItem {
@@ -40,9 +40,8 @@ export default function ChatItem({ item }: ChatItemProps) {
             router.push({
               pathname: '/ChatScreen',
               params: {
-                conversationId: item.conversation_id,
-                id: item.partner.user_id,
-                name: item.partner.full_name,
+                userId: item.partner.user_id,
+                user_name: item.partner.full_name,
                 avatar: item.partner.avatar_url,
                 postId: item.post.post_id,
               },
