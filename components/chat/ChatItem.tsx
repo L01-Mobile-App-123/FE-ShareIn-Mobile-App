@@ -1,4 +1,5 @@
 import { Post, PostService } from '@/services/postService';
+import { getDefaultAvatar } from '@/services/userService';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -50,7 +51,7 @@ export default function ChatItem({ item }: ChatItemProps) {
           style={styles.main}
         >
           <Image
-            source={{ uri: item.partner.avatar_url }}
+            source={{ uri: item.partner.avatar_url ?? getDefaultAvatar(item.partner.full_name) }}
             style={styles.avatar}
           />
           <View style={styles.textWrap}>
@@ -63,7 +64,10 @@ export default function ChatItem({ item }: ChatItemProps) {
           </View>
         </Pressable>
 
-        <Pressable onPress={() => setExpanded((v) => !v)}>
+        <Pressable
+          testID="chevron-pressable"
+          onPress={() => setExpanded((v) => !v)}
+        >
           <Ionicons
             name={expanded ? 'chevron-up' : 'chevron-down'}
             size={18}

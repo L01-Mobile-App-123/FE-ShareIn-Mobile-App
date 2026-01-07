@@ -1,5 +1,6 @@
 import * as ImagePicker from 'expo-image-picker';
 import ApiClient, { cleanPayload } from '../config/api';
+import analytics from '@react-native-firebase/analytics';
 
 export type Rating = {
   rating_id: string;
@@ -48,6 +49,7 @@ function buildQuery(params?: Record<string, string | number | undefined>) {
 export const RatingService = {
   async create(data: CreateRatingDto): Promise<Rating> {
     const res = await ApiClient.post('/api/v1/ratings', cleanPayload(data));
+    analytics().logEvent('rating_created', { rating_id: res.data.rating_id });
     return res.data;
   },
 

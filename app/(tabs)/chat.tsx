@@ -8,6 +8,8 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
   Pressable,
+  RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -19,6 +21,17 @@ export default function Chat() {
   const router = useRouter();
   const [search, setSearch] = useState('');
   const [conversations, setConversations] = useState<any[]>([]);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    try {
+      setRefreshing(true);
+      ConversationService.getAll().then(setConversations);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     ConversationService.getAll().then(setConversations);
@@ -36,10 +49,6 @@ export default function Chat() {
 
   const [myUserId, setMyUserId] = useState<string | null>(null); // 👈 thêm
 
-  useEffect(() => {
-    ConversationService.getAll().then(setConversations);
-  }, []);
-
   // 👇 lấy user giống ChatScreen
   useEffect(() => {
     UserService.getMe().then((me) => setMyUserId(me.user_id));
@@ -53,33 +62,45 @@ export default function Chat() {
   }, [myUserId]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} color="#222" />
-        </Pressable>
-        <Text style={styles.title}>Chat</Text>
-      </View>
-
-      <View style={styles.searchWrap}>
-        <Text style={styles.searchLabel}>Search</Text>
-        <View style={styles.searchInputWrap}>
-          <TextInput
-            value={search}
-            onChangeText={setSearch}
-            style={styles.searchInput}
-          />
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={['#FF9A00']} // Android
+          tintColor="#FF9A00" // iOS
+        />
+      }
+    >
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={24} color="#222" />
+          </Pressable>
+          <Text style={styles.title}>Chat</Text>
         </View>
-      </View>
 
-      <FlatList
-        data={filtered}
-        keyExtractor={(item) => item.conversation_id}
-        renderItem={({ item }) => <ChatItem item={item} />}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-      />
-    </SafeAreaView>
+        <View style={styles.searchWrap}>
+          <Text style={styles.searchLabel}>Search</Text>
+          <View style={styles.searchInputWrap}>
+            <TextInput
+              value={search}
+              onChangeText={setSearch}
+              style={styles.searchInput}
+            />
+          </View>
+        </View>
+
+        <FlatList
+          data={filtered}
+          keyExtractor={(item) => item.conversation_id}
+          renderItem={({ item }) => <ChatItem item={item} />}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+        />
+      </SafeAreaView>
+    </ScrollView>
   );
 }
 

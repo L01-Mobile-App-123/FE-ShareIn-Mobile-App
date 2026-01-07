@@ -57,6 +57,12 @@ export default function SignUpScreen() {
       Alert.alert('Success', 'Account created successfully');
       await UserService.login();
 
+      const payload = {
+        full_name: name.trim(),
+        phone_number: phone.trim(),
+      };
+      await UserService.updateProfile(payload);
+
       router.replace('/(tabs)');
     } catch (error: any) {
       let message = 'Sign up failed';

@@ -18,17 +18,19 @@ import {
 export default function AddInterestCard({
   isFullWidth,
   initKeyword = '',
+  initCategoryId = null,
 }: {
   isFullWidth?: boolean;
   initKeyword?: string;
+  initCategoryId?: string | null;
 }) {
   const [keyword, setKeyword] = useState(initKeyword);
-  const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [categoryId, setCategoryId] = useState<string | null>(initCategoryId);
   const [loading, setLoading] = useState(false);
 
   const handleAddInterest = async () => {
     if (!categoryId || !keyword) {
-      alert('Please fill in both fields');
+      Alert.alert('Please fill in both fields');
       return;
     }
     try {
@@ -91,7 +93,7 @@ export default function AddInterestCard({
 export function CategoryDropdown({
   categoryId,
   setCategoryId,
-  isShowLabel = true,
+  isShowLabel = true
 }: {
   categoryId: string | null;
   setCategoryId: (id: string) => void;

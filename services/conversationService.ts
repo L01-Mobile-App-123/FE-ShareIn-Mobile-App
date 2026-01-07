@@ -1,4 +1,6 @@
+import { Alert } from 'react-native';
 import ApiClient, { cleanPayload } from '../config/api';
+import analytics from '@react-native-firebase/analytics';
 
 /* ========== TYPES ========== */
 
@@ -101,12 +103,17 @@ export const ConversationService = {
       return res.data;
     } catch (e) {
       console.log('findOrCreate error:', e);
+      Alert.alert(
+        'Error',
+        'Unable to start conversation with yourself.',
+      );
       throw e;
     }
   },
 
   async getAll(): Promise<Conversation[]> {
     const res = await ApiClient.get('/api/v1/conversations');
+    analytics().logEvent('conversations_fetched', {});
     const raw = res.data.data ?? res.data;
 
     return raw.map((c: any) => ({

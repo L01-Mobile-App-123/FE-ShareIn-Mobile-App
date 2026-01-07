@@ -1,7 +1,7 @@
 import { getSocket } from '@/services/chatSocket';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 export default function ChatInput({
   conversationId,
@@ -17,6 +17,7 @@ export default function ChatInput({
     if (!socket) return;
 
     if (!socket.connected) {
+      Alert.alert('Connection lost', 'Waiting to reconnect to the server...');
       console.log('Socket chưa sẵn sàng, chờ reconnect...');
       return;
     }
@@ -46,6 +47,7 @@ export default function ChatInput({
         disableFullscreenUI={true}
       />
       <Pressable
+        testID="send-button"
         style={[styles.sendBtn, !text.trim() && { backgroundColor: '#E0E0E0' }]}
         onPress={handleSend}
         disabled={!text.trim()}

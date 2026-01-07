@@ -20,12 +20,14 @@ export default function MessageBubble({
     >
       {!isSender && (
         <Image
+          testID="message-avatar"
           source={{ uri: avatar || 'https://i.pravatar.cc/100?img=4' }}
           style={styles.avatar}
         />
       )}
 
       <View
+        testID='message-bubble'
         style={[
           styles.bubble,
           {

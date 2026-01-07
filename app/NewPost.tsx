@@ -91,6 +91,8 @@ export default function NewPost() {
   const [amountFrom, setAmountFrom] = useState('');
   const [amountTo, setAmountTo] = useState('');
 
+  const [loading, setLoading] = useState(false);
+
   const mapTradeType = (t: TradeType): 'CHO_MIEN_PHI' | 'BAN_RE' | 'DOI_DO' => {
     if (t === 'give') return 'CHO_MIEN_PHI';
     if (t === 'swap') return 'DOI_DO';
@@ -133,8 +135,10 @@ export default function NewPost() {
       {
         text: 'Save',
         onPress: async () => {
-          if (!categoryValue || !location) {
-            Alert.alert('Error', 'Category and location are required');
+          setLoading(true);
+          if (!categoryValue || !location || !content.trim()) {
+            Alert.alert('Error', 'Category, location, and content are required');
+            setLoading(false);
             return;
           }
 
@@ -147,8 +151,8 @@ export default function NewPost() {
             price: calcPrice(tradeType, amountFrom, amountTo),
             status: 'draft',
           };
-
           const post = await PostService.createPost(payload);
+        
 
           analytics().logEvent('post_draft_create', { post_id: post.post_id });
 
@@ -156,6 +160,7 @@ export default function NewPost() {
           if (selectedImages.length > 0) {
             await PostService.uploadImages(post.post_id, selectedImages);
           }
+          setLoading(false);
 
           router.back();
         },
@@ -169,8 +174,10 @@ export default function NewPost() {
       {
         text: 'Post',
         onPress: async () => {
-          if (!categoryValue || !location) {
-            Alert.alert('Error', 'Category and location are required');
+          setLoading(true);
+          if (!categoryValue || !location || !content.trim()) {
+            Alert.alert('Error', 'Category, location, and content are required');
+            setLoading(false);
             return;
           }
 
@@ -192,6 +199,7 @@ export default function NewPost() {
           if (selectedImages.length > 0) {
             await PostService.uploadImages(post.post_id, selectedImages);
           }
+          setLoading(false);
 
           router.back();
         },
@@ -211,11 +219,11 @@ export default function NewPost() {
           </View>
 
           <View style={styles.topRight}>
-            <Pressable style={styles.saveBtn} onPress={handleSave}>
+            <Pressable style={[styles.saveBtn, loading && styles.disabledBtn]} onPress={handleSave} disabled={loading} >
               <Text style={styles.saveText}>Save</Text>
             </Pressable>
 
-            <Pressable style={styles.postBtn} onPress={handlePost}>
+            <Pressable style={[styles.postBtn, loading && styles.disabledBtn]} onPress={handlePost} disabled={loading}>
               <Text style={styles.postText}>Post</Text>
             </Pressable>
           </View>
@@ -501,6 +509,10 @@ const styles = StyleSheet.create({
   postText: {
     fontSize: 13,
     fontWeight: '600',
+  },
+
+  disabledBtn: {
+    opacity: 0.3,
   },
 
   previewContainer: {

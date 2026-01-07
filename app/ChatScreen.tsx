@@ -1,14 +1,14 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import ChatArea, { ChatMessage } from '@/components/chat/ChatArea';
 import ChatHeader from '@/components/chat/ChatHeader';
 import ChatInput from '@/components/chat/ChatInput';
-import { getSocket } from '@/services/chatSocket';
+import { connectSocket, getSocket } from '@/services/chatSocket';
 import { ConversationService } from '@/services/conversationService';
-import { UserService } from '@/services/userService';
+import { getDefaultAvatar, UserService } from '@/services/userService';
 
 export default function ChatScreen() {
   const [socket, setSocket] = useState<any>(null);
@@ -38,6 +38,34 @@ export default function ChatScreen() {
     typeof paramConversationId === 'string' ? paramConversationId : null,
   );
 
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = async () => {
+    try {
+      setRefreshing(true);
+      if (!conversationId) return;
+
+      ConversationService.getMessages({
+        conversationId,
+        page: 1,
+        limit: 100,
+      }).then((res) => {
+        const mapped: ChatMessage[] = res.data.map((m) => ({
+          id: m.message_id,
+          message: m.content,
+          senderId: m.sender_id,
+          avatar: m.sender.avatar_url,
+          name: m.sender.full_name,
+        }));
+
+        setMessages(mapped);
+        // setMessages(mapped);
+        ConversationService.markAsRead(conversationId);
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const handleGoBack = () => router.push('/(tabs)/chat');
 
   useEffect(() => {
@@ -66,9 +94,10 @@ export default function ChatScreen() {
         message: m.content,
         senderId: m.sender_id,
         avatar: m.sender.avatar_url,
+        name: m.sender.full_name,
       }));
 
-      setMessages(mapped.reverse()); // đảo ở đây
+      setMessages(mapped); // đảo ở đây
       // setMessages(mapped);
       ConversationService.markAsRead(conversationId);
     });
@@ -79,43 +108,93 @@ export default function ChatScreen() {
     if (avatar) setPartnerAvatar(String(avatar));
   }, [user_name, avatar]);
 
+  // useEffect(() => {
+  //   if (!conversationId || !myUserId) return;
+
+  //   const socket = connectSocket(myUserId);
+
+  //   socket.on('message_sent', (payload: any) => {
+  //     console.log('Message sent confirmed:', payload);
+  //     if (payload.conversation_id !== conversationId) return;
+
+  //     setMessages((prev) => [
+  //       {
+  //         id: payload.message_id,
+  //         message: payload.content,
+  //         senderId: payload.sender_id,
+  //         avatar: payload.sender?.avatar_url,
+  //         name: payload.sender?.full_name,
+  //       },
+  //       ...prev
+  //     ]); 
+  //   });
+
+  //   return () => {
+  //     socket.off('new_message');
+  //     socket.disconnect();
+  //   };
+  // }, [conversationId, myUserId]);
+
+
+  // useEffect(() => {
+  //   if (!myUserId) return;
+
+  //   const socket = connectSocket(myUserId);
+
+  //   const onMessageSent = (payload: any) => {
+  //     console.log('Message sent confirmed:', payload);
+
+  //     // ❗ chỉ filter, KHÔNG connect/disconnect
+  //     if (payload.conversation_id !== conversationId) return;
+
+  //     setMessages((prev) => [
+  //       {
+  //         id: payload.message_id,
+  //         message: payload.content,
+  //         senderId: payload.sender_id,
+  //         avatar: payload.sender?.avatar_url,
+  //         name: payload.sender?.full_name,
+  //       },
+  //       ...prev,
+  //     ]);
+  //   };
+
+  //   socket.on('message_sent', onMessageSent);
+
+  //   return () => {
+  //     socket.off('message_sent', onMessageSent); // ✅ đúng event
+  //   };
+  // }, [myUserId, conversationId]);
+
   useEffect(() => {
-    if (!conversationId || !myUserId) return;
+    const socket = getSocket();
+    if (!socket) return;
 
-    // const socket = connectSocket(myUserId);
-
-    socket.on('new_message', (payload: any) => {
-      if (payload.conversationId !== conversationId) return;
+    const onNewMessage = (payload: any) => {
+      console.log('New message received:', payload);
+      if (payload.conversation_id !== conversationId) return;
 
       setMessages((prev) => [
-        ...prev,
         {
-          id: payload.message_id,
+          id: payload.message_id, 
           message: payload.content,
           senderId: payload.sender_id,
           avatar: payload.sender?.avatar_url,
+          name: payload.sender?.full_name,
         },
+        ...prev,
       ]);
-    });
+    };
+
+    socket.on('new_message', onNewMessage);
+    socket.on('message_sent', onNewMessage);
 
     return () => {
-      socket.off('new_message');
-      // socket.disconnect();
+      socket.off('new_message', onNewMessage);
+      socket.off('message_sent', onNewMessage);
     };
-  }, [conversationId, myUserId]);
+  }, [conversationId]);
 
-  const handleLocalSend = (text: string) => {
-    if (!myUserId) return;
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        message: text,
-        senderId: myUserId,
-      },
-    ]);
-  };
 
   if (!myUserId) return null;
 
@@ -127,7 +206,7 @@ export default function ChatScreen() {
       >
         <ChatHeader
           name={partnerName}
-          avatar={partnerAvatar}
+          avatar={partnerAvatar ?? getDefaultAvatar(partnerName)}
           isBlocked={isBlocked}
           onStarPress={() =>
             router.push({ pathname: '/Feedback', params: { postId } })
@@ -135,12 +214,12 @@ export default function ChatScreen() {
           onBackPress={handleGoBack}
         />
 
-        <ChatArea messages={messages} recipientId={String(recipientId)} />
+        <ChatArea messages={messages} recipientId={String(recipientId)} refreshing={refreshing} onRefresh={onRefresh} />
 
         {conversationId && (
           <ChatInput
             conversationId={conversationId}
-            onLocalSend={handleLocalSend}
+            onLocalSend={(text) => {}}
           />
         )}
       </KeyboardAvoidingView>

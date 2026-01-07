@@ -71,7 +71,7 @@ export default function SettingScreen() {
     // xin quyền
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      alert('Cần quyền truy cập thư viện ảnh');
+      Alert.alert('Cần quyền truy cập thư viện ảnh');
       return;
     }
 

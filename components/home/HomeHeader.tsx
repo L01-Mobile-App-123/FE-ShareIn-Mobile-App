@@ -1,4 +1,4 @@
-import { UserService } from '@/services/userService';
+import { getDefaultAvatar, UserService } from '@/services/userService';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
@@ -28,10 +28,11 @@ export default function HomeHeader() {
 
   return !loading ? (
     <View style={styles.header}>
-      <Image
-        source={{ uri: user?.avatar_url as string | undefined }}
+      {user && (<Image
+        testID="user-avatar"
+        source={{ uri: user?.avatar_url as string || getDefaultAvatar(user?.fullName as string) }}
         style={styles.avatar}
-      />
+      />)}
       <Pressable style={{ flex: 1 }} onPress={() => router.push('/NewPost')}>
         <View style={styles.inputContainer}>
           <Ionicons name="create-outline" size={20} color="#fff" />

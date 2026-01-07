@@ -146,6 +146,7 @@ export default function PostItem({
             <View style={styles.ratingRow}>
               {[1, 2, 3, 4, 5].map((star) => (
                 <Ionicons
+                  testID="star-icon"
                   key={star}
                   name={star <= item.rating ? 'star' : 'star-outline'}
                   size={20}
@@ -200,7 +201,7 @@ export default function PostItem({
               style={styles.footerBtn}
               onPress={() => router.push(`/NewPost?editId=${item.post_id}`)}
             >
-              <Ionicons name="create-outline" size={22} color="black" />
+              <Ionicons testID="edit-icon" name="create-outline" size={22} color="black" />
               <Text style={styles.footerBtnText}>Edit</Text>
             </TouchableOpacity>
           ) : (
@@ -210,6 +211,7 @@ export default function PostItem({
                 onPress={handleLikePress}
               >
                 <Ionicons
+                  testID='like-icon'
                   name={liked ? 'heart' : 'heart-outline'}
                   size={24}
                   color={liked ? 'red' : 'black'}
@@ -221,7 +223,7 @@ export default function PostItem({
                 style={styles.footerBtn}
                 onPress={handleChatPress}
               >
-                <Ionicons name="chatbubble-outline" size={22} color="black" />
+                <Ionicons testID="chat-icon" name="chatbubble-outline" size={22} color="black" />
                 <Text style={styles.footerBtnText}>Chat</Text>
               </TouchableOpacity>
 
@@ -230,6 +232,7 @@ export default function PostItem({
                 onPress={handleSavePress}
               >
                 <Ionicons
+                  testID='save-icon'
                   name={saved ? 'bookmark' : 'bookmark-outline'}
                   size={22}
                   color={saved ? 'blue' : 'black'}

@@ -1,5 +1,6 @@
 import * as ImagePicker from 'expo-image-picker';
 import ApiClient, { cleanPayload } from '../config/api';
+import { Alert } from 'react-native';
 
 export type Category = {
   category_id: string;
@@ -142,7 +143,16 @@ export const PostService = {
   },
 
   async like(postId: string): Promise<void> {
-    await ApiClient.post(`/api/v1/posts/${postId}/like`);
+    try {
+      await ApiClient.post(`/api/v1/posts/${postId}/like`);
+    } catch (e) {
+      console.log('like error:', e);
+      Alert.alert(
+        'Error',
+        'Unable to like your own post.',
+      );
+      throw e;
+    }
   },
 
   async unlike(postId: string): Promise<void> {
@@ -150,7 +160,17 @@ export const PostService = {
   },
 
   async save(postId: string): Promise<void> {
-    await ApiClient.post(`/api/v1/posts/${postId}/save`);
+    try {
+      await ApiClient.post(`/api/v1/posts/${postId}/save`);
+    }
+    catch (e) {
+      console.log('save error:', e);
+      Alert.alert(
+        'Error',
+        'Unable to save your own post.',
+      );
+      throw e;
+    }
   },
 
   async unsave(postId: string): Promise<void> {

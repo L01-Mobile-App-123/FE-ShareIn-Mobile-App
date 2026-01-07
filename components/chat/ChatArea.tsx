@@ -1,6 +1,6 @@
-import { UserService } from '@/services/userService';
+import { getDefaultAvatar, UserService } from '@/services/userService';
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { FlatList, ScrollView, StyleSheet } from 'react-native';
 import MessageBubble from './MessageBubble';
 
 export type ChatMessage = {
@@ -8,14 +8,17 @@ export type ChatMessage = {
   message: string;
   senderId: string;
   avatar?: string;
+  name: string;
 };
 
 type ChatAreaProps = {
   messages: ChatMessage[];
   recipientId: string;
+  refreshing: boolean;
+  onRefresh: () => void;
 };
 
-export default function ChatArea({ messages }: ChatAreaProps) {
+export default function ChatArea({ messages, refreshing, onRefresh }: ChatAreaProps) {
   const [myUserId, setMyUserId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -25,24 +28,45 @@ export default function ChatArea({ messages }: ChatAreaProps) {
   if (!myUserId) return null;
 
   return (
-    <ScrollView
-      style={{ flex: 1 }}
-      contentContainerStyle={styles.contentContainer}
-    >
-      {/* {[...messages].reverse().map((m) => { */}
-      {messages.map((m) => {
-        const isSender = m.senderId === myUserId;
+    // <ScrollView
+    //   style={{ flex: 1 }}
+    //   contentContainerStyle={styles.contentContainer}
+    // >
+    //   {/* {[...messages].reverse().map((m) => { */}
+    //   {messages.map((m) => {
+    //     const isSender = m.senderId === myUserId;
 
+    //     return (
+    //       <MessageBubble
+    //         key={m.id}
+    //         message={m.message}
+    //         isSender={isSender}
+    //         avatar={m.avatar ?? getDefaultAvatar(m.name || '')}
+    //       />
+    //     );
+    //   })}
+    // </ScrollView>
+    <FlatList
+      data={ messages }
+      inverted
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => {
+        const isSender = item.senderId === myUserId;
         return (
           <MessageBubble
-            key={m.id}
-            message={m.message}
+            message={item.message}
             isSender={isSender}
-            avatar={m.avatar}
+            avatar={item.avatar ?? getDefaultAvatar(item.name || '')}
           />
         );
-      })}
-    </ScrollView>
+      }}
+      contentContainerStyle={styles.contentContainer}
+      keyboardDismissMode="on-drag"
+      keyboardShouldPersistTaps="handled"
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+    />
+
   );
 }
 
