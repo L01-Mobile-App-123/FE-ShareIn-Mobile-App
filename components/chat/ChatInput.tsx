@@ -10,50 +10,48 @@ export default function ChatInput({
   conversationId: string;
   onLocalSend: (text: string) => void;
 }) {
-  // console.log('ChatInput rendered');
-
   const [text, setText] = useState('');
 
   const handleSend = () => {
     const socket = getSocket();
+    if (!socket) return;
 
-    if (!socket) {
-      console.log('No socket');
+    if (!socket.connected) {
+      console.log('Socket chưa sẵn sàng, chờ reconnect...');
       return;
     }
-    if (!conversationId) {
-      console.log('No conversationId');
-      return;
-    }
-    if (!text.trim()) return;
 
-    const payload = {
+    const messageContent = text.trim();
+    if (!conversationId || !messageContent) return;
+
+    socket.emit('send_message', {
       conversationId,
-      content: text,
+      content: messageContent,
       messageType: 'TEXT',
-    };
+    });
 
-    console.log('Emit send_message:', payload);
-    socket.emit('send_message', payload);
-
-    onLocalSend(text); // hiển thị ngay
+    onLocalSend(messageContent);
     setText('');
   };
 
   return (
-    <View>
-      <View style={styles.wrapper}>
-        <TextInput
-          style={styles.input}
-          placeholder="Type something..."
-          placeholderTextColor="#999"
-          value={text}
-          onChangeText={setText}
-        />
-        <Pressable style={styles.sendBtn} onPress={handleSend}>
-          <Ionicons name="send-outline" size={22} color="#fff" />
-        </Pressable>
-      </View>
+    <View style={styles.wrapper}>
+      <TextInput
+        style={styles.input}
+        placeholder="Type something..."
+        placeholderTextColor="#999"
+        value={text}
+        onChangeText={setText}
+        // Đảm bảo không bị lag trên Android
+        disableFullscreenUI={true}
+      />
+      <Pressable
+        style={[styles.sendBtn, !text.trim() && { backgroundColor: '#E0E0E0' }]}
+        onPress={handleSend}
+        disabled={!text.trim()}
+      >
+        <Ionicons name="send-outline" size={22} color="#fff" />
+      </Pressable>
     </View>
   );
 }
@@ -67,7 +65,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 0.5,
     borderColor: '#ddd',
     backgroundColor: '#fff',
-    // pointerEvents: 'box-none',
   },
   input: {
     flex: 1,
@@ -77,10 +74,15 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 12,
     marginRight: 10,
+    color: '#000',
   },
   sendBtn: {
     backgroundColor: '#FDD835',
     borderRadius: 20,
-    padding: 6,
+    padding: 8,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
