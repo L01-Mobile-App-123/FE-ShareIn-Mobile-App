@@ -1,10 +1,12 @@
+import { UserService } from '@/services/userService';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import MessageBubble from './MessageBubble';
 
 export type ChatMessage = {
   id: string;
   message: string;
-  senderId: string; // thêm field này
+  senderId: string;
   avatar?: string;
 };
 
@@ -13,23 +15,23 @@ type ChatAreaProps = {
   recipientId: string;
 };
 
-export default function ChatArea({ messages, recipientId }: ChatAreaProps) {
+export default function ChatArea({ messages }: ChatAreaProps) {
+  const [myUserId, setMyUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    UserService.getMe().then((me) => setMyUserId(me.user_id));
+  }, []);
+
+  if (!myUserId) return null;
+
   return (
     <ScrollView
       style={{ flex: 1 }}
       contentContainerStyle={styles.contentContainer}
     >
+      {/* {[...messages].reverse().map((m) => { */}
       {messages.map((m) => {
-        console.log(
-          'render message id:',
-          m.id,
-          'senderId:',
-          m.senderId,
-          'recipientId:',
-          recipientId,
-        );
-
-        const isSender = m.senderId !== recipientId;
+        const isSender = m.senderId === myUserId;
 
         return (
           <MessageBubble
@@ -45,6 +47,5 @@ export default function ChatArea({ messages, recipientId }: ChatAreaProps) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: 'white' },
   contentContainer: { paddingTop: 12, paddingBottom: 12 },
 });

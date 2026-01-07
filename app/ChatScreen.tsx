@@ -8,37 +8,43 @@ import ChatHeader from '@/components/chat/ChatHeader';
 import ChatInput from '@/components/chat/ChatInput';
 import { connectSocket } from '@/services/chatSocket';
 import { ConversationService } from '@/services/conversationService';
+import { UserService } from '@/services/userService';
 
 export default function ChatScreen() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [partnerName, setPartnerName] = useState('');
   const [partnerAvatar, setPartnerAvatar] = useState<string | undefined>();
+  const [myUserId, setMyUserId] = useState<string | null>(null);
 
   const [isBlocked] = useState(false);
 
   const router = useRouter();
   const {
     postId,
-    userId,
+    userId: recipientId,
     avatar,
     user_name,
     conversationId: paramConversationId,
   } = useLocalSearchParams();
+
   const [conversationId, setConversationId] = useState<string | null>(
     typeof paramConversationId === 'string' ? paramConversationId : null,
   );
+
   const handleGoBack = () => router.push('/(tabs)/chat');
 
   useEffect(() => {
-    if (!userId) return;
+    UserService.getMe().then((me) => setMyUserId(me.user_id));
+  }, []);
+
+  useEffect(() => {
+    if (!recipientId) return;
 
     ConversationService.findOrCreate({
-      recipient_id: String(userId),
+      recipient_id: String(recipientId),
       post_id: String(postId),
-    }).then((res) => {
-      setConversationId(res.conversation_id);
-    });
-  }, [userId, postId]);
+    }).then((res) => setConversationId(res.conversation_id));
+  }, [recipientId, postId]);
 
   useEffect(() => {
     if (!conversationId) return;
@@ -46,7 +52,7 @@ export default function ChatScreen() {
     ConversationService.getMessages({
       conversationId,
       page: 1,
-      limit: 50,
+      limit: 100,
     }).then((res) => {
       const mapped: ChatMessage[] = res.data.map((m) => ({
         id: m.message_id,
@@ -55,7 +61,8 @@ export default function ChatScreen() {
         avatar: m.sender.avatar_url,
       }));
 
-      setMessages(mapped);
+      setMessages(mapped.reverse()); // đảo ở đây
+      // setMessages(mapped);
       ConversationService.markAsRead(conversationId);
     });
   }, [conversationId]);
@@ -66,9 +73,9 @@ export default function ChatScreen() {
   }, [user_name, avatar]);
 
   useEffect(() => {
-    if (!conversationId || !userId) return;
+    if (!conversationId || !myUserId) return;
 
-    const socket = connectSocket(String(userId));
+    const socket = connectSocket(myUserId);
 
     socket.on('new_message', (payload) => {
       if (payload.conversationId !== conversationId) return;
@@ -86,24 +93,24 @@ export default function ChatScreen() {
 
     return () => {
       socket.off('new_message');
+      socket.disconnect();
     };
-  }, [conversationId, userId]);
+  }, [conversationId, myUserId]);
 
   const handleLocalSend = (text: string) => {
+    if (!myUserId) return;
+
     setMessages((prev) => [
       ...prev,
       {
         id: Date.now().toString(),
         message: text,
-        senderId: String(userId),
+        senderId: myUserId,
       },
     ]);
   };
 
-  useEffect(() => {
-    if (!userId) return;
-    connectSocket(String(userId));
-  }, [userId]);
+  if (!myUserId) return null;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -116,15 +123,12 @@ export default function ChatScreen() {
           avatar={partnerAvatar}
           isBlocked={isBlocked}
           onStarPress={() =>
-            router.push({
-              pathname: '/Feedback',
-              params: { postId: postId },
-            })
+            router.push({ pathname: '/Feedback', params: { postId } })
           }
           onBackPress={handleGoBack}
         />
 
-        <ChatArea messages={messages} recipientId={String(userId)} />
+        <ChatArea messages={messages} recipientId={String(recipientId)} />
 
         {conversationId && (
           <ChatInput
